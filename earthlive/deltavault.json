@@ -1,0 +1,79 @@
+[
+  {
+    "timestamp": "2026-04-18T20:07:12.631Z",
+    "totalEvents": 0,
+    "sources": [
+      "earthquakes",
+      "solar",
+      "weather"
+    ],
+    "sourceCounts": {
+      "earthquakes": 0,
+      "solar": 0,
+      "weather": 0
+    },
+    "sourceHealth": {
+      "earthquakes": "fail",
+      "solar": "fail",
+      "weather": "fail"
+    }
+  },
+  {
+    "timestamp": "2026-04-18T22:11:09.786Z",
+    "count": 4,
+    "sources": [
+      "earthquakes",
+      "solar",
+      "weather",
+      "volcano",
+      "aircraft",
+      "gibs"
+    ],
+    "sourceCounts": {
+      "earthquakes": 0,
+      "solar": 0,
+      "weather": 0,
+      "volcano": 0,
+      "aircraft": 0,
+      "gibs": 4
+    },
+    "sourceHealth": {
+      "earthquakes": "fail",
+      "solar": "fail",
+      "weather": "fail",
+      "volcano": "fail",
+      "aircraft": "fail",
+      "gibs": "ok"
+    },
+    "missingCount": 5
+  },
+  {
+    "timestamp": "2026-04-25T08:29:42.550Z",
+    "count": 323,
+    "sources": [
+      "earthquakes",
+      "solar",
+      "weather",
+      "volcano",
+      "aircraft",
+      "gibs"
+    ],
+    "sourceCounts": {
+      "earthquakes": 270,
+      "solar": 0,
+      "weather": 4,
+      "volcano": 20,
+      "aircraft": 25,
+      "gibs": 4
+    },
+    "sourceHealth": {
+      "earthquakes": "ok",
+      "solar": "fail",
+      "weather": "ok",
+      "volcano": "ok",
+      "aircraft": "ok",
+      "gibs": "ok"
+    },
+    "missingCount": 1
+  }
+]
