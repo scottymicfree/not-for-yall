@@ -1,0 +1,6 @@
+{
+  "name": "Lucy OS // Secure Drive",
+  "description": "A secure, sandboxed file manager and communication terminal for Lucy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
