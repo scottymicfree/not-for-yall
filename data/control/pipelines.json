@@ -1,0 +1,50 @@
+{
+  "pipelines": [
+    {
+      "id": "112e66ba-3288-496c-8f2b-d9341f9f7850",
+      "request": "build a standalone fivem framework",
+      "engine": "FIVEM",
+      "status": "pending",
+      "createdAt": "2026-04-18T23:10:31.801Z",
+      "updatedAt": "2026-04-18T23:10:31.801Z",
+      "proposedBy": "local-operator",
+      "estimatedSize": "medium",
+      "missingConfig": [
+        "fivemRoot"
+      ],
+      "steps": [
+        {
+          "id": 1,
+          "action": "SCAFFOLD_RESOURCE",
+          "desc": "Scaffold a standalone FiveM resource.",
+          "command": "",
+          "status": "pending",
+          "output": "",
+          "error": "",
+          "approvedAt": null,
+          "startedAt": null,
+          "finishedAt": null
+        },
+        {
+          "id": 2,
+          "action": "WRITE_MANIFEST",
+          "desc": "Write fxmanifest scaffold.",
+          "command": "",
+          "status": "pending",
+          "output": "",
+          "error": "",
+          "approvedAt": null,
+          "startedAt": null,
+          "finishedAt": null
+        }
+      ],
+      "eventLog": [
+        {
+          "at": "2026-04-18T23:10:31.801Z",
+          "type": "PIPELINE_CREATED",
+          "message": "Pipeline created for FIVEM."
+        }
+      ]
+    }
+  ]
+}

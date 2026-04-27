@@ -1,0 +1,160 @@
+{
+  "packs": {
+    "fivem": {
+      "id": "fivem",
+      "label": "FiveM Scripting Core",
+      "type": "engine_docs",
+      "primary": "https://docs.fivem.net/docs/scripting-manual/",
+      "refs": [
+        "https://docs.fivem.net/docs/scripting-manual/introduction/creating-your-first-script/",
+        "https://docs.fivem.net/docs/scripting-reference/resource-manifest/resource-manifest/",
+        "https://docs.fivem.net/natives/"
+      ],
+      "tags": [
+        "lua",
+        "server",
+        "client",
+        "gta5",
+        "resources",
+        "fivem"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    },
+    "unity": {
+      "id": "unity",
+      "label": "Unity Build System",
+      "type": "engine_docs",
+      "primary": "https://docs.unity3d.com/Manual/",
+      "refs": [],
+      "tags": [
+        "unity",
+        "c#",
+        "vr",
+        "buildpipeline",
+        "pcg"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    },
+    "ue5": {
+      "id": "ue5",
+      "label": "Unreal Engine 5",
+      "type": "engine_docs",
+      "primary": "https://dev.epicgames.com/documentation/en-us/unreal-engine",
+      "refs": [],
+      "tags": [
+        "unreal",
+        "ue5",
+        "blueprints",
+        "cpp",
+        "vr",
+        "rendering"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    },
+    "blender": {
+      "id": "blender",
+      "label": "Blender Modeling Lane",
+      "type": "engine_docs",
+      "primary": "https://docs.blender.org/manual/en/latest/",
+      "refs": [],
+      "tags": [
+        "blender",
+        "modeling",
+        "assets",
+        "fbx",
+        "gltf"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    },
+    "godot": {
+      "id": "godot",
+      "label": "Godot Engine",
+      "type": "engine_docs",
+      "primary": "https://docs.godotengine.org/en/stable/",
+      "refs": [],
+      "tags": [
+        "godot",
+        "gdscript",
+        "xr",
+        "game"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    },
+    "earth": {
+      "id": "earth",
+      "label": "Lucy Earth Live Feeds",
+      "type": "earth_feeds",
+      "primary": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+      "refs": [
+        "https://volcanoes.usgs.gov/hans-public/api/volcano/getMonitoredVolcanoes",
+        "https://services.swpc.noaa.gov/json/rtsw.json",
+        "https://api.weather.gov/",
+        "https://opensky-network.org/api/states/all",
+        "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi"
+      ],
+      "tags": [
+        "earth",
+        "weather",
+        "seismic",
+        "volcano",
+        "solar",
+        "aircraft",
+        "imagery"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    },
+    "earth2": {
+      "id": "earth2",
+      "label": "NVIDIA Earth-2 / Earth2Studio",
+      "type": "bridge_docs",
+      "primary": "https://nvidia.github.io/earth2studio/",
+      "refs": [
+        "https://www.nvidia.com/en-us/high-performance-computing/earth-2/"
+      ],
+      "tags": [
+        "earth2",
+        "earth2studio",
+        "forecast",
+        "twin-earth",
+        "nvidia"
+      ],
+      "active": true,
+      "sourceMode": "human_curated",
+      "planningOnly": true,
+      "version": "2026.04",
+      "createdAt": 1776555929297,
+      "updatedAt": 1776555929297
+    }
+  },
+  "updatedAt": "2026-04-18T23:45:29.297Z"
+}

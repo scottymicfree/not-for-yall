@@ -1,0 +1,22 @@
+{
+  "active": {
+    "userId": "local-operator",
+    "activePackIds": [
+      "fivem"
+    ],
+    "mode": "build",
+    "lastResolvedFrom": "set fivem toolbelt",
+    "timestamp": 1776555960733
+  },
+  "history": [
+    {
+      "userId": "local-operator",
+      "activePackIds": [
+        "fivem"
+      ],
+      "mode": "build",
+      "lastResolvedFrom": "set fivem toolbelt",
+      "timestamp": 1776555960733
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "messages": [
+    {
+      "id": "1fa7ddd8-7963-40f9-9524-2988500ea29d",
+      "role": "assistant",
+      "text": "Hello. I am Lucy, the persona interface inside Emma. I can review system state, save your build paths, propose governed build pipelines, and execute approved steps.",
+      "createdAt": 1776553828624
+    },
+    {
+      "id": "80112927-72ae-4b48-b073-32de78e279a3",
+      "role": "user",
+      "text": "set project path C:\\Projects\\LucyGame",
+      "createdAt": 1776553830524
+    },
+    {
+      "id": "f692baec-530f-4b17-a0fc-f819f824257e",
+      "role": "assistant",
+      "text": "Saved projectPath to Lucy config. Current build config: UE5=unset | Unity=unset | Project=C:\\Projects\\LucyGame | Blender=unset | Godot=unset | FiveM=unset",
+      "createdAt": 1776553830525
+    },
+    {
+      "id": "89771f25-7dc7-49a6-a9da-418f805b3815",
+      "role": "user",
+      "text": "build a standalone fivem framework",
+      "createdAt": 1776553831799
+    },
+    {
+      "id": "d04739ee-6a15-4740-b8ef-34ed902f178a",
+      "role": "assistant",
+      "text": "Pipeline 112e66ba for FIVEM.\nMissing config: fivemRoot. Set paths in chat first.\n1. SCAFFOLD_RESOURCE — Scaffold a standalone FiveM resource.\n2. WRITE_MANIFEST — Write fxmanifest scaffold.\nReply \"approve all\" or \"approve step N\".",
+      "createdAt": 1776553831801
+    },
+    {
+      "id": "95abe9f7-54f9-4947-8d93-db295d23fda1",
+      "role": "user",
+      "text": "set fivem toolbelt",
+      "createdAt": 1776555960731
+    },
+    {
+      "id": "ac83d4c9-af5d-4b77-af6f-c08fa27e1a0c",
+      "role": "assistant",
+      "text": "Activated fivem toolbelt. Active toolbelt: FiveM Scripting Core (build)",
+      "createdAt": 1776555960733
+    }
+  ]
+}

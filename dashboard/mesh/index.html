@@ -1,0 +1,2445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucy OS v5 — 137-Node Cognitive Mesh</title>
+  <style>
+    /* ═══════════════════════════════════════════════════
+       LUCY OS v5 DASHBOARD — FULL 137-NODE MESH
+       ═══════════════════════════════════════════════════ */
+    :root {
+      --bg:        #050810;
+      --panel:     #0a0f1e;
+      --border:    #1a2540;
+      --accent:    #00d4ff;
+      --accent2:   #7c3aed;
+      --accent3:   #10b981;
+      --accent4:   #f59e0b;
+      --accent5:   #ef4444;
+      --text:      #e2e8f0;
+      --text-dim:  #64748b;
+      --text-mid:  #94a3b8;
+      --glow:      0 0 20px rgba(0,212,255,0.3);
+      --glow2:     0 0 20px rgba(124,58,237,0.3);
+      --font:      'Courier New', monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+      font-size:12px;
+      overflow-x:hidden;
+      height:100%;
+    }
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:var(--panel);}
+    ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+    
+    /* ── HEADER ── */
+    .header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 20px;
+      background:linear-gradient(90deg,#050810,#0d1b3e,#050810);
+      border-bottom:1px solid var(--border);
+      position:sticky;top:0;z-index:100;
+    }
+    .header-logo{
+      font-size:18px;font-weight:bold;letter-spacing:3px;
+      color:var(--accent);text-shadow:var(--glow);
+    }
+    .header-logo span{color:var(--accent2);}
+    .header-status{display:flex;gap:16px;align-items:center;}
+    .status-pill{
+      padding:3px 10px;border-radius:20px;font-size:10px;font-weight:bold;letter-spacing:1px;
+      border:1px solid;
+    }
+    .status-pill.online{
+      color:var(--accent3);border-color:var(--accent3);
+      background:rgba(16,185,129,0.1);
+      box-shadow:0 0 8px rgba(16,185,129,0.3);
+      animation:pulse-green 2s infinite;
+    }
+    .status-pill.degraded{color:var(--accent4);border-color:var(--accent4);background:rgba(245,158,11,0.1);}
+    .status-pill.offline{color:var(--accent5);border-color:var(--accent5);background:rgba(239,68,68,0.1);}
+    .header-time{color:var(--text-dim);font-size:10px;}
+    
+    /* ── LAYOUT ── */
+    .layout{display:grid;grid-template-columns:220px 1fr 260px;gap:8px;padding:8px;height:calc(100vh - 45px);}
+    .col{display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+    
+    /* ── PANEL ── */
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:6px;
+      padding:10px;
+      position:relative;
+      overflow:hidden;
+    }
+    .panel::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      opacity:0.5;
+    }
+    .panel-title{
+      font-size:9px;letter-spacing:2px;text-transform:uppercase;
+      color:var(--accent);margin-bottom:8px;display:flex;
+      align-items:center;gap:6px;
+    }
+    .panel-title .dot{
+      width:6px;height:6px;border-radius:50%;background:var(--accent);
+      box-shadow:0 0 6px var(--accent);animation:pulse 2s infinite;
+    }
+    
+    /* ── LAYER NODES ── */
+    .layer-section{margin-bottom:8px;}
+    .layer-name{
+      font-size:9px;letter-spacing:1.5px;color:var(--text-dim);
+      text-transform:uppercase;margin-bottom:4px;padding-left:2px;
+    }
+    .node-grid{display:flex;flex-wrap:wrap;gap:3px;}
+    .node{
+      width:18px;height:18px;border-radius:3px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:7px;cursor:pointer;transition:all 0.2s;
+      position:relative;
+    }
+    .node:hover{transform:scale(1.3);z-index:10;}
+    .node.active{
+      background:rgba(0,212,255,0.2);border:1px solid var(--accent);
+      box-shadow:0 0 6px rgba(0,212,255,0.5);color:var(--accent);
+    }
+    .node.busy{
+      background:rgba(245,158,11,0.2);border:1px solid var(--accent4);
+      box-shadow:0 0 6px rgba(245,158,11,0.5);color:var(--accent4);
+      animation:node-busy 1s infinite alternate;
+    }
+    .node.error{
+      background:rgba(239,68,68,0.2);border:1px solid var(--accent5);
+      color:var(--accent5);
+    }
+    .node.idle{
+      background:rgba(30,40,70,0.6);border:1px solid #1e2840;
+      color:var(--text-dim);
+    }
+    .node.emma{
+      background:rgba(124,58,237,0.2);border:1px solid var(--accent2);
+      box-shadow:0 0 6px rgba(124,58,237,0.4);color:var(--accent2);
+    }
+    .node.lucy{
+      background:rgba(16,185,129,0.2);border:1px solid var(--accent3);
+      box-shadow:0 0 6px rgba(16,185,129,0.4);color:var(--accent3);
+    }
+    
+    /* ── METRIC TILES ── */
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+    .metric-tile{
+      background:rgba(10,15,30,0.8);border:1px solid var(--border);
+      border-radius:4px;padding:8px;text-align:center;
+    }
+    .metric-val{
+      font-size:20px;font-weight:bold;line-height:1;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .metric-val.green{background:linear-gradient(135deg,#10b981,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .metric-val.amber{background:linear-gradient(135deg,#f59e0b,#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .metric-val.red{background:linear-gradient(135deg,#ef4444,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .metric-label{font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:3px;}
+    
+    /* ── CANVAS MESH ── */
+    #meshCanvas{
+      width:100%;height:100%;
+      border-radius:6px;
+      display:block;
+    }
+    .canvas-wrap{
+      position:relative;
+      flex:1;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:6px;
+      overflow:hidden;
+      min-height:400px;
+    }
+    .canvas-wrap::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      opacity:0.5;
+    }
+    .canvas-overlay{
+      position:absolute;top:8px;left:8px;
+      font-size:9px;color:var(--accent);letter-spacing:1.5px;
+      text-transform:uppercase;opacity:0.8;
+    }
+    .canvas-legend{
+      position:absolute;bottom:8px;left:8px;
+      display:flex;gap:10px;
+    }
+    .legend-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text-dim);}
+    .legend-dot{width:8px;height:8px;border-radius:50%;}
+    
+    /* ── LTE GAUGE ── */
+    .lte-gauge-wrap{text-align:center;padding:8px 0;}
+    #lteGauge{display:block;margin:0 auto;}
+    .lte-grade{
+      font-size:32px;font-weight:bold;text-align:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent3));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      margin-top:4px;
+    }
+    .lte-raw{font-size:11px;color:var(--text-mid);text-align:center;}
+    
+    /* ── BAR CHARTS ── */
+    .bar-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+    .bar-label{width:70px;font-size:9px;color:var(--text-mid);text-align:right;flex-shrink:0;}
+    .bar-track{flex:1;height:10px;background:rgba(30,40,70,0.6);border-radius:5px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:5px;transition:width 0.6s ease;}
+    .bar-val{width:38px;font-size:9px;color:var(--text-dim);text-align:left;flex-shrink:0;}
+    
+    /* ── LOG STREAM ── */
+    .log-stream{
+      height:180px;overflow-y:auto;
+      background:rgba(5,8,16,0.8);
+      border:1px solid var(--border);
+      border-radius:4px;padding:6px;
+      font-size:10px;line-height:1.6;
+    }
+    .log-line{margin-bottom:1px;}
+    .log-line .ts{color:var(--text-dim);margin-right:6px;}
+    .log-line .tag{padding:1px 5px;border-radius:3px;margin-right:5px;font-size:9px;font-weight:bold;}
+    .tag-info{background:rgba(0,212,255,0.15);color:var(--accent);}
+    .tag-warn{background:rgba(245,158,11,0.15);color:var(--accent4);}
+    .tag-block{background:rgba(239,68,68,0.15);color:var(--accent5);}
+    .tag-ok{background:rgba(16,185,129,0.15);color:var(--accent3);}
+    
+    /* ── CHAT PANEL ── */
+    .chat-panel{display:flex;flex-direction:column;gap:0;}
+    .chat-messages{
+      flex:1;height:200px;overflow-y:auto;
+      background:rgba(5,8,16,0.8);
+      border:1px solid var(--border);
+      border-radius:4px 4px 0 0;
+      padding:8px;font-size:11px;line-height:1.6;
+    }
+    .chat-msg{margin-bottom:6px;}
+    .chat-msg.lucy .name{color:var(--accent);}
+    .chat-msg.user .name{color:var(--accent3);}
+    .chat-msg .name{font-weight:bold;font-size:9px;letter-spacing:1px;}
+    .chat-msg .body{color:var(--text-mid);margin-top:1px;word-break:break-word;}
+    .chat-input-row{display:flex;gap:0;}
+    .chat-input{
+      flex:1;background:rgba(10,15,30,0.9);
+      border:1px solid var(--border);border-top:none;border-radius:0 0 0 4px;
+      color:var(--text);padding:6px 8px;font-family:var(--font);font-size:11px;
+      outline:none;
+    }
+    .chat-input:focus{border-color:var(--accent);}
+    .chat-send{
+      background:var(--accent);color:var(--bg);
+      border:none;border-radius:0 0 4px 0;
+      padding:0 12px;cursor:pointer;font-weight:bold;font-size:11px;
+      font-family:var(--font);transition:all 0.2s;
+    }
+    .chat-send:hover{background:var(--accent2);color:white;}
+    
+    /* ── CONSENSUS RING ── */
+    .consensus-rings{display:flex;gap:8px;justify-content:center;margin:6px 0;}
+    .ring{text-align:center;}
+    .ring-label{font-size:9px;color:var(--text-dim);margin-top:3px;}
+    .ring canvas{display:block;margin:0 auto;}
+    
+    /* ── SPIDER / RADAR ── */
+    #spiderCanvas{display:block;margin:0 auto;}
+    
+    /* ── SCROLL TICKER ── */
+    .ticker{
+      height:22px;overflow:hidden;
+      background:rgba(0,212,255,0.05);
+      border:1px solid rgba(0,212,255,0.1);
+      border-radius:4px;
+      position:relative;
+    }
+    .ticker-inner{
+      display:flex;align-items:center;height:100%;
+      animation:ticker-scroll 30s linear infinite;
+      white-space:nowrap;
+    }
+    .ticker-item{
+      padding:0 20px;font-size:9px;color:var(--accent);letter-spacing:1px;
+    }
+    .ticker-sep{color:var(--text-dim);}
+    
+    /* ── GRID HEATMAP ── */
+    .heatmap-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
+    .heat-cell{
+      height:24px;border-radius:3px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:8px;font-weight:bold;cursor:pointer;
+      transition:all 0.3s;
+    }
+    .heat-cell:hover{transform:scale(1.1);z-index:5;position:relative;}
+    
+    /* ── ANIMATIONS ── */
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+    @keyframes pulse-green{0%,100%{box-shadow:0 0 8px rgba(16,185,129,0.3);}50%{box-shadow:0 0 16px rgba(16,185,129,0.6);}}
+    @keyframes node-busy{from{opacity:1;}to{opacity:0.5;}}
+    @keyframes ticker-scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+    @keyframes scan-line{0%{top:-2px;}100%{top:100%;}}
+    .scan-line{
+      position:absolute;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,212,255,0.5),transparent);
+      animation:scan-line 3s linear infinite;pointer-events:none;
+    }
+    
+    /* ── TOOLTIP ── */
+    .tooltip{
+      position:fixed;background:rgba(10,20,40,0.95);
+      border:1px solid var(--accent);border-radius:4px;
+      padding:6px 10px;font-size:10px;color:var(--text);
+      pointer-events:none;z-index:999;display:none;
+      max-width:200px;line-height:1.5;
+    }
+    
+    /* ── RESPONSIVE GRID ── */
+    .full-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
+    .sub-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    
+    /* ── SECTION DIVIDER ── */
+    .divider{
+      height:1px;margin:6px 0;
+      background:linear-gradient(90deg,transparent,var(--border),transparent);
+    }
+    
+    /* ── UPGRADE FEED ── */
+    .upgrade-item{
+      padding:5px 8px;margin-bottom:4px;
+      border-left:2px solid var(--accent2);
+      background:rgba(124,58,237,0.05);border-radius:0 3px 3px 0;
+      font-size:10px;
+    }
+    .upgrade-item .mod{color:var(--accent2);font-weight:bold;}
+    .upgrade-item .status-ok{color:var(--accent3);}
+    .upgrade-item .status-pend{color:var(--accent4);}
+
+    /* ── NVIDIA Earth-2 TwinEarth Section ─────────────────────────────── */
+    .earth2-section {
+      background: #070d1a;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      margin: 10px 12px 12px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(6,182,212,0.05);
+    }
+    .earth2-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid #1e293b;
+      background: #0a1628;
+    }
+    .earth2-title-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .earth2-title { font-size: 16px; font-weight: 700; color: #e2e8f0; letter-spacing: 0.5px; }
+    .earth2-subtitle { font-weight: 300; color: #64748b; font-size: 14px; }
+    .earth2-header-badges { display: flex; gap: 8px; align-items: center; }
+    .earth2-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 2px;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      background: #0f172a;
+      white-space: nowrap;
+    }
+    .earth2-badge.nvidia { border-color: #76b900; color: #76b900; background: rgba(118,185,0,0.08); }
+    .earth2-badge.green { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.08); }
+    .earth2-badge.mono { font-family: 'Courier New', monospace; }
+    .pulse-badge { animation: badgePulse 2s infinite; }
+    @keyframes badgePulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .earth2-body {
+      display: grid;
+      grid-template-columns: 380px 1fr 320px;
+      gap: 0;
+      min-height: 420px;
+    }
+    @media (max-width: 1400px) {
+      .earth2-body { grid-template-columns: 320px 1fr 280px; }
+    }
+
+    /* Globe Column */
+    .earth2-globe-col {
+      border-right: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      background: #050b18;
+    }
+    .earth2-globe-container {
+      position: relative;
+      flex: 1;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #020610;
+      border-bottom: 1px solid #1e293b;
+      overflow: hidden;
+    }
+    .earth2-canvas {
+      display: block;
+      border-radius: 4px;
+    }
+    .terminator-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 50%;
+      transition: background 60s linear;
+    }
+    .earth2-globe-badge {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      z-index: 10;
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: liveDotPulse 1.5s infinite;
+      display: inline-block;
+    }
+    @keyframes liveDotPulse {
+      0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.7)}
+      50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}
+    }
+    .earth2-expand-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      z-index: 20;
+      background: rgba(15,23,42,0.7);
+      border: 1px solid #334155;
+      color: #94a3b8;
+      width: 28px; height: 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .earth2-expand-btn:hover { color: #06b6d4; border-color: #06b6d4; }
+    .earth2-globe-footer {
+      position: absolute;
+      bottom: 8px; left: 8px; right: 8px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+    .earth2-nims-panel {
+      padding: 10px 12px;
+      background: #080f20;
+    }
+    .nims-grid { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+    .nims-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      color: #64748b;
+      background: #0a1628;
+      padding: 4px 8px;
+      border-radius: 2px;
+    }
+    .nims-row .green { color: #10b981; }
+    .nims-row .white { color: #e2e8f0; }
+    .nims-row .blue { color: #60a5fa; }
+
+    /* Feed Column */
+    .earth2-feed-col {
+      border-right: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      background: #050b18;
+      overflow: hidden;
+    }
+    .earth2-feed-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e293b;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #080f20;
+      flex-shrink: 0;
+    }
+    .earth2-feed-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .earth2-feed-list::-webkit-scrollbar { width: 4px; }
+    .earth2-feed-list::-webkit-scrollbar-track { background: #0a1628; }
+    .earth2-feed-list::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
+    .e2-feed-item {
+      background: #0a1628;
+      border: 1px solid #1e293b;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: feedSlide 0.3s ease-out;
+      transition: border-color 0.2s;
+    }
+    .e2-feed-item:hover { border-color: rgba(6,182,212,0.3); }
+    @keyframes feedSlide { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+    .e2-feed-top { display: flex; justify-content: space-between; align-items: center; }
+    .e2-feed-source {
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .e2-src-usgs { background:rgba(251,146,60,0.1); color:#fb923c; border:1px solid rgba(251,146,60,0.2); }
+    .e2-src-noaa { background:rgba(34,211,238,0.1); color:#22d3ee; border:1px solid rgba(34,211,238,0.2); }
+    .e2-src-nasa { background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.2); }
+    .e2-src-adsb { background:rgba(52,211,153,0.1); color:#34d399; border:1px solid rgba(52,211,153,0.2); }
+    .e2-src-swarm { background:rgba(167,139,250,0.1); color:#a78bfa; border:1px solid rgba(167,139,250,0.2); }
+    .e2-feed-ref { font-size: 8px; color: #475569; }
+    .e2-feed-type { color: #94a3b8; font-size: 10px; }
+    .e2-feed-bottom { display: flex; justify-content: space-between; }
+    .e2-feed-loc { font-size: 9px; color: #64748b; }
+    .e2-feed-val { color: #f1f5f9; font-weight: 700; font-size: 10px; }
+
+    /* Scenario Column */
+    .earth2-scenario-col {
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      gap: 10px;
+      background: #080f20;
+      position: relative;
+      overflow: hidden;
+    }
+    .earth2-scenario-col::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .earth2-scenario-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.3px;
+    }
+    .earth2-scenario-sub { font-family: 'Courier New',monospace; font-size: 9px; color: #64748b; margin-top: -4px; }
+    .earth2-form-group { display: flex; flex-direction: column; gap: 4px; }
+    .earth2-form-group label { font-family:'Courier New',monospace; font-size:9px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; }
+    .earth2-input {
+      background: #050b18;
+      border: 1px solid #1e3a5f;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #cbd5e1;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .earth2-input:focus { border-color: #06b6d4; }
+    .earth2-textarea {
+      background: #050b18;
+      border: 1px solid #1e3a5f;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #cbd5e1;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+      transition: border-color 0.2s;
+    }
+    .earth2-textarea:focus { border-color: #06b6d4; }
+    .earth2-run-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      background: rgba(6,182,212,0.07);
+      border: 1px solid rgba(6,182,212,0.25);
+      color: #06b6d4;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 15px rgba(6,182,212,0.05);
+    }
+    .earth2-run-btn:hover { background:rgba(6,182,212,0.15); border-color:rgba(6,182,212,0.6); box-shadow:0 0 20px rgba(6,182,212,0.2); }
+    .earth2-run-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .earth2-progress-wrap { display:flex; flex-direction:column; gap:5px; }
+    .earth2-progress-label { display:flex; justify-content:space-between; font-family:'Courier New',monospace; font-size:9px; color:#64748b; }
+    .earth2-progress-track { height:4px; background:#1e293b; border-radius:2px; overflow:hidden; }
+    .earth2-progress-fill { height:100%; background:#06b6d4; box-shadow:0 0 8px #06b6d4; transition:width 0.3s; border-radius:2px; width:0%; }
+    .earth2-results {
+      background: #0a1628;
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 4px;
+      padding: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .earth2-results::before { content:''; position:absolute; left:0;top:0; width:3px;height:100%; background:#10b981; box-shadow:0 0 8px #10b981; }
+    .earth2-results-header { display:flex; align-items:center; gap:6px; font-family:'Courier New',monospace; font-size:10px; color:#10b981; font-weight:700; padding-left:6px; }
+    .earth2-results-body { font-family:'Courier New',monospace; font-size:9px; color:#cbd5e1; line-height:1.6; padding-left:6px; margin-top:4px; }
+    .earth2-stats-row { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-top:auto; }
+    .earth2-stat-tile { background:#050b18; border:1px solid #1e293b; border-radius:4px; padding:8px 4px; text-align:center; }
+    .stat-val { font-family:'Courier New',monospace; font-size:16px; font-weight:700; line-height:1; }
+    .stat-val.amber { color:#f59e0b; }
+    .stat-val.cyan { color:#06b6d4; }
+    .stat-val.green { color:#10b981; }
+    .stat-val.white { color:#f1f5f9; }
+    .stat-label { font-family:'Courier New',monospace; font-size:7px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+
+/* ── NVIDIA Earth-2 TwinEarth ──────────────────────────────────────── */
+    .earth2-section{background:#070d1a;border:1px solid #1e3a5f;border-radius:6px;margin:10px 12px 16px;overflow:hidden;box-shadow:0 0 40px rgba(6,182,212,.05)}
+    .earth2-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #1e293b;background:#0a1628;flex-wrap:wrap;gap:8px}
+    .earth2-title-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .earth2-title{font-size:16px;font-weight:700;color:#e2e8f0;letter-spacing:.5px}
+    .earth2-subtitle{font-weight:300;color:#64748b;font-size:14px}
+    .earth2-header-badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .earth2-badge{font-family:'Courier New',monospace;font-size:9px;padding:2px 7px;border-radius:2px;border:1px solid #334155;color:#94a3b8;background:#0f172a;white-space:nowrap}
+    .earth2-badge.nvidia{border-color:#76b900;color:#76b900;background:rgba(118,185,0,.08)}
+    .earth2-badge.green{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.08)}
+    .earth2-badge.mono{font-family:'Courier New',monospace}
+    .pulse-badge{animation:badgePulse 2s infinite}
+    @keyframes badgePulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .earth2-body{display:grid;grid-template-columns:370px 1fr 300px;min-height:400px}
+    .earth2-globe-col{border-right:1px solid #1e293b;display:flex;flex-direction:column;background:#050b18}
+    .earth2-globe-container{position:relative;flex:1;min-height:270px;display:flex;align-items:center;justify-content:center;background:#020610;border-bottom:1px solid #1e293b;overflow:hidden}
+    .earth2-canvas{display:block}
+    .terminator-overlay{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply}
+    .earth2-globe-badge{position:absolute;top:10px;left:12px;z-index:10;font-family:'Courier New',monospace;font-size:9px;color:#cbd5e1;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:1px}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:liveDot 1.5s infinite;display:inline-block}
+    @keyframes liveDot{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.7)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+    .earth2-expand-btn{position:absolute;top:8px;right:8px;z-index:20;background:rgba(15,23,42,.7);border:1px solid #334155;color:#94a3b8;width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .earth2-expand-btn:hover{color:#06b6d4;border-color:#06b6d4}
+    .earth2-globe-footer{position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:6px;z-index:10;flex-wrap:wrap}
+    .earth2-nims-panel{padding:10px 12px;background:#080f20}
+    .nims-grid{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+    .nims-row{display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:9px;color:#64748b;background:#0a1628;padding:4px 8px;border-radius:2px}
+    .earth2-feed-col{border-right:1px solid #1e293b;display:flex;flex-direction:column;background:#050b18;overflow:hidden}
+    .earth2-feed-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #1e293b;font-family:'Courier New',monospace;font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;background:#080f20;flex-shrink:0}
+    .earth2-feed-list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;max-height:360px}
+    .earth2-feed-list::-webkit-scrollbar{width:4px}
+    .earth2-feed-list::-webkit-scrollbar-track{background:#0a1628}
+    .earth2-feed-list::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:2px}
+    .e2-feed-item{background:#0a1628;border:1px solid #1e293b;border-radius:4px;padding:8px 10px;font-family:'Courier New',monospace;font-size:10px;display:flex;flex-direction:column;gap:4px;animation:feedSlide .3s ease-out;transition:border-color .2s}
+    .e2-feed-item:hover{border-color:rgba(6,182,212,.3)}
+    @keyframes feedSlide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+    .e2-feed-top{display:flex;justify-content:space-between;align-items:center}
+    .e2-feed-source{font-size:9px;padding:1px 6px;border-radius:2px;font-weight:700}
+    .e2-src-usgs{background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)}
+    .e2-src-noaa{background:rgba(34,211,238,.1);color:#22d3ee;border:1px solid rgba(34,211,238,.2)}
+    .e2-src-nasa{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.2)}
+    .e2-src-adsb{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2)}
+    .e2-src-swarm{background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+    .e2-feed-ref{font-size:8px;color:#475569}
+    .e2-feed-type{color:#94a3b8;font-size:10px}
+    .e2-feed-bottom{display:flex;justify-content:space-between}
+    .e2-feed-loc{font-size:9px;color:#64748b}
+    .e2-feed-val{color:#f1f5f9;font-weight:700;font-size:10px}
+    .earth2-scenario-col{display:flex;flex-direction:column;padding:14px;gap:10px;background:#080f20;position:relative;overflow:hidden}
+    .earth2-scenario-col::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(6,182,212,.08) 0%,transparent 70%);pointer-events:none}
+    .earth2-scenario-header{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#f1f5f9;letter-spacing:.3px}
+    .earth2-scenario-sub{font-family:'Courier New',monospace;font-size:9px;color:#64748b;margin-top:-4px}
+    .earth2-form-group{display:flex;flex-direction:column;gap:4px}
+    .earth2-form-group label{font-family:'Courier New',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+    .earth2-input{background:#050b18;border:1px solid #1e3a5f;border-radius:4px;padding:8px 10px;font-family:'Courier New',monospace;font-size:10px;color:#cbd5e1;outline:none;transition:border-color .2s}
+    .earth2-input:focus{border-color:#06b6d4}
+    .earth2-textarea{background:#050b18;border:1px solid #1e3a5f;border-radius:4px;padding:8px 10px;font-family:'Courier New',monospace;font-size:10px;color:#cbd5e1;outline:none;resize:vertical;min-height:80px;line-height:1.5;transition:border-color .2s}
+    .earth2-textarea:focus{border-color:#06b6d4}
+    .earth2-run-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.25);color:#06b6d4;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;cursor:pointer;transition:all .2s;box-shadow:0 0 15px rgba(6,182,212,.05)}
+    .earth2-run-btn:hover{background:rgba(6,182,212,.15);border-color:rgba(6,182,212,.6);box-shadow:0 0 20px rgba(6,182,212,.2)}
+    .earth2-run-btn:disabled{opacity:.4;cursor:not-allowed}
+    .earth2-progress-wrap{display:flex;flex-direction:column;gap:5px}
+    .earth2-progress-label{display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:9px;color:#64748b}
+    .earth2-progress-track{height:4px;background:#1e293b;border-radius:2px;overflow:hidden}
+    .earth2-progress-fill{height:100%;background:#06b6d4;box-shadow:0 0 8px #06b6d4;transition:width .3s;border-radius:2px;width:0%}
+    .earth2-results{background:#0a1628;border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:10px;position:relative;overflow:hidden}
+    .earth2-results::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;background:#10b981;box-shadow:0 0 8px #10b981}
+    .earth2-results-header{display:flex;align-items:center;gap:6px;font-family:'Courier New',monospace;font-size:10px;color:#10b981;font-weight:700;padding-left:6px}
+    .earth2-results-body{font-family:'Courier New',monospace;font-size:9px;color:#cbd5e1;line-height:1.6;padding-left:6px;margin-top:4px}
+    .earth2-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:auto}
+    .earth2-stat-tile{background:#050b18;border:1px solid #1e293b;border-radius:4px;padding:8px 4px;text-align:center}
+    .stat-label{font-family:'Courier New',monospace;font-size:7px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+  </style>
+  <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body style="padding-top: 40px;">
+  <div class="header">
+    <div class="header-logo">LUCY<span>OS</span> v5 <span class="c554">— 137-NODE COGNITIVE MESH</span></div>
+    <div class="header-status">
+      <div id="systemStatus" class="status-pill online">● NOMINAL</div>
+      <div class="c606">LTE: <span id="headerLTE" class="c618">75</span></div>
+      <div class="c646">NODES: <span id="headerNodes" class="c658">137</span></div>
+      <div class="c686">Q: <span id="headerQueries" class="c698">0</span></div>
+      <div id="headerClock" class="header-time">22:20:37 UTC</div>
+    </div>
+  </div><!-- ═══ TICKER ═══ -->
+  <div class="ticker c778">
+    <div id="tickerInner" class="ticker-inner"><span class="ticker-item">● EMMA MESH ACTIVE — E1-E24 NOMINAL</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● SWARM ONLINE — 48 AGENTS DISTRIBUTED</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● TWINEARTH SIM-A RUNNING</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● DELTA VAULT INTEGRITY: ✓</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● EAGLE EYE PRESSURE INDEX: 0.12</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● BIOYTH0N GATE: TRUSTED</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● FIVEM BRIDGE: CONNECTED</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● EARTH DATA: FRESH</span><span
+        class="ticker-sep">│</span><!-- duplicate for seamless scroll --><span class="ticker-item">● EMMA MESH ACTIVE —
+        E1-E24 NOMINAL</span><span class="ticker-sep">│</span><span class="ticker-item">● SWARM ONLINE — 48 AGENTS
+        DISTRIBUTED</span><span class="ticker-sep">│</span><span class="ticker-item">● TWINEARTH SIM-A
+        RUNNING</span><span class="ticker-sep">│</span><span class="ticker-item">● DELTA VAULT INTEGRITY: ✓</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● EAGLE EYE PRESSURE INDEX: 0.12</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● BIOYTH0N GATE: TRUSTED</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● FIVEM BRIDGE: CONNECTED</span><span
+        class="ticker-sep">│</span><span class="ticker-item">● EARTH DATA: FRESH</span><span class="ticker-sep">│</span>
+    </div>
+  </div><!-- ═══ LAYOUT ═══ -->
+  <div class="layout"><!-- ══════ LEFT COLUMN ══════ -->
+    <div class="col"><!-- 137 Node Map -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>137-NODE MESH MAP
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Perception (12)</div>
+          <div id="nodes-perception" class="node-grid">
+            <div title="P1" data-nid="P1" class="node active">1</div>
+            <div title="P2" data-nid="P2" class="node active">2</div>
+            <div title="P3" data-nid="P3" class="node active">3</div>
+            <div title="P4" data-nid="P4" class="node active">4</div>
+            <div title="P5" data-nid="P5" class="node active">5</div>
+            <div title="P6" data-nid="P6" class="node active">6</div>
+            <div title="P7" data-nid="P7" class="node active">7</div>
+            <div title="P8" data-nid="P8" class="node active">8</div>
+            <div title="P9" data-nid="P9" class="node active">9</div>
+            <div title="P10" data-nid="P10" class="node active">10</div>
+            <div title="P11" data-nid="P11" class="node active">11</div>
+            <div title="P12" data-nid="P12" class="node active">12</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Memory (18)</div>
+          <div id="nodes-memory" class="node-grid">
+            <div title="M1" data-nid="M1" class="node active">1</div>
+            <div title="M2" data-nid="M2" class="node active">2</div>
+            <div title="M3" data-nid="M3" class="node busy">3</div>
+            <div title="M4" data-nid="M4" class="node active">4</div>
+            <div title="M5" data-nid="M5" class="node active">5</div>
+            <div title="M6" data-nid="M6" class="node active">6</div>
+            <div title="M7" data-nid="M7" class="node active">7</div>
+            <div title="M8" data-nid="M8" class="node active">8</div>
+            <div title="M9" data-nid="M9" class="node active">9</div>
+            <div title="M10" data-nid="M10" class="node active">10</div>
+            <div title="M11" data-nid="M11" class="node active">11</div>
+            <div title="M12" data-nid="M12" class="node active">12</div>
+            <div title="M13" data-nid="M13" class="node active">13</div>
+            <div title="M14" data-nid="M14" class="node active">14</div>
+            <div title="M15" data-nid="M15" class="node active">15</div>
+            <div title="M16" data-nid="M16" class="node active">16</div>
+            <div title="M17" data-nid="M17" class="node active">17</div>
+            <div title="M18" data-nid="M18" class="node active">18</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Swarm L1-L48 (48)</div>
+          <div id="nodes-swarm" class="node-grid">
+            <div title="L1" data-nid="L1" class="node active">1</div>
+            <div title="L2" data-nid="L2" class="node active">2</div>
+            <div title="L3" data-nid="L3" class="node active">3</div>
+            <div title="L4" data-nid="L4" class="node active">4</div>
+            <div title="L5" data-nid="L5" class="node active">5</div>
+            <div title="L6" data-nid="L6" class="node active">6</div>
+            <div title="L7" data-nid="L7" class="node active">7</div>
+            <div title="L8" data-nid="L8" class="node active">8</div>
+            <div title="L9" data-nid="L9" class="node active">9</div>
+            <div title="L10" data-nid="L10" class="node active">10</div>
+            <div title="L11" data-nid="L11" class="node active">11</div>
+            <div title="L12" data-nid="L12" class="node active">12</div>
+            <div title="L13" data-nid="L13" class="node active">13</div>
+            <div title="L14" data-nid="L14" class="node active">14</div>
+            <div title="L15" data-nid="L15" class="node active">15</div>
+            <div title="L16" data-nid="L16" class="node active">16</div>
+            <div title="L17" data-nid="L17" class="node active">17</div>
+            <div title="L18" data-nid="L18" class="node active">18</div>
+            <div title="L19" data-nid="L19" class="node active">19</div>
+            <div title="L20" data-nid="L20" class="node active">20</div>
+            <div title="L21" data-nid="L21" class="node active">21</div>
+            <div title="L22" data-nid="L22" class="node active">22</div>
+            <div title="L23" data-nid="L23" class="node active">23</div>
+            <div title="L24" data-nid="L24" class="node active">24</div>
+            <div title="L25" data-nid="L25" class="node active">25</div>
+            <div title="L26" data-nid="L26" class="node active">26</div>
+            <div title="L27" data-nid="L27" class="node active">27</div>
+            <div title="L28" data-nid="L28" class="node active">28</div>
+            <div title="L29" data-nid="L29" class="node active">29</div>
+            <div title="L30" data-nid="L30" class="node active">30</div>
+            <div title="L31" data-nid="L31" class="node active">31</div>
+            <div title="L32" data-nid="L32" class="node active">32</div>
+            <div title="L33" data-nid="L33" class="node active">33</div>
+            <div title="L34" data-nid="L34" class="node active">34</div>
+            <div title="L35" data-nid="L35" class="node active">35</div>
+            <div title="L36" data-nid="L36" class="node active">36</div>
+            <div title="L37" data-nid="L37" class="node active">37</div>
+            <div title="L38" data-nid="L38" class="node active">38</div>
+            <div title="L39" data-nid="L39" class="node active">39</div>
+            <div title="L40" data-nid="L40" class="node busy">40</div>
+            <div title="L41" data-nid="L41" class="node active">41</div>
+            <div title="L42" data-nid="L42" class="node active">42</div>
+            <div title="L43" data-nid="L43" class="node active">43</div>
+            <div title="L44" data-nid="L44" class="node active">44</div>
+            <div title="L45" data-nid="L45" class="node active">45</div>
+            <div title="L46" data-nid="L46" class="node active">46</div>
+            <div title="L47" data-nid="L47" class="node active">47</div>
+            <div title="L48" data-nid="L48" class="node active">48</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Emma E1-E24 (24)</div>
+          <div id="nodes-emma" class="node-grid">
+            <div title="E1" data-nid="E1" class="node emma">1</div>
+            <div title="E2" data-nid="E2" class="node emma">2</div>
+            <div title="E3" data-nid="E3" class="node emma">3</div>
+            <div title="E4" data-nid="E4" class="node emma">4</div>
+            <div title="E5" data-nid="E5" class="node emma">5</div>
+            <div title="E6" data-nid="E6" class="node emma">6</div>
+            <div title="E7" data-nid="E7" class="node emma">7</div>
+            <div title="E8" data-nid="E8" class="node emma">8</div>
+            <div title="E9" data-nid="E9" class="node emma">9</div>
+            <div title="E10" data-nid="E10" class="node emma">10</div>
+            <div title="E11" data-nid="E11" class="node emma">11</div>
+            <div title="E12" data-nid="E12" class="node emma">12</div>
+            <div title="E13" data-nid="E13" class="node emma">13</div>
+            <div title="E14" data-nid="E14" class="node emma">14</div>
+            <div title="E15" data-nid="E15" class="node emma">15</div>
+            <div title="E16" data-nid="E16" class="node emma">16</div>
+            <div title="E17" data-nid="E17" class="node emma">17</div>
+            <div title="E18" data-nid="E18" class="node emma">18</div>
+            <div title="E19" data-nid="E19" class="node emma">19</div>
+            <div title="E20" data-nid="E20" class="node emma">20</div>
+            <div title="E21" data-nid="E21" class="node emma">21</div>
+            <div title="E22" data-nid="E22" class="node emma">22</div>
+            <div title="E23" data-nid="E23" class="node emma">23</div>
+            <div title="E24" data-nid="E24" class="node emma">24</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Lucy Prime LP1-LP12 (12)</div>
+          <div id="nodes-lucy" class="node-grid">
+            <div title="LP1" data-nid="LP1" class="node lucy">1</div>
+            <div title="LP2" data-nid="LP2" class="node lucy">2</div>
+            <div title="LP3" data-nid="LP3" class="node lucy">3</div>
+            <div title="LP4" data-nid="LP4" class="node lucy">4</div>
+            <div title="LP5" data-nid="LP5" class="node lucy">5</div>
+            <div title="LP6" data-nid="LP6" class="node lucy">6</div>
+            <div title="LP7" data-nid="LP7" class="node lucy">7</div>
+            <div title="LP8" data-nid="LP8" class="node lucy">8</div>
+            <div title="LP9" data-nid="LP9" class="node lucy">9</div>
+            <div title="LP10" data-nid="LP10" class="node lucy">10</div>
+            <div title="LP11" data-nid="LP11" class="node lucy">11</div>
+            <div title="LP12" data-nid="LP12" class="node lucy">12</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Infrastructure (10)</div>
+          <div id="nodes-infra" class="node-grid">
+            <div title="I1" data-nid="I1" class="node active">1</div>
+            <div title="I2" data-nid="I2" class="node active">2</div>
+            <div title="I3" data-nid="I3" class="node busy">3</div>
+            <div title="I4" data-nid="I4" class="node active">4</div>
+            <div title="I5" data-nid="I5" class="node active">5</div>
+            <div title="I6" data-nid="I6" class="node busy">6</div>
+            <div title="I7" data-nid="I7" class="node active">7</div>
+            <div title="I8" data-nid="I8" class="node active">8</div>
+            <div title="I9" data-nid="I9" class="node active">9</div>
+            <div title="I10" data-nid="I10" class="node active">10</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Output (7)</div>
+          <div id="nodes-output" class="node-grid">
+            <div title="O1" data-nid="O1" class="node active">1</div>
+            <div title="O2" data-nid="O2" class="node active">2</div>
+            <div title="O3" data-nid="O3" class="node active">3</div>
+            <div title="O4" data-nid="O4" class="node active">4</div>
+            <div title="O5" data-nid="O5" class="node active">5</div>
+            <div title="O6" data-nid="O6" class="node active">6</div>
+            <div title="O7" data-nid="O7" class="node busy">7</div>
+          </div>
+        </div>
+        <div class="layer-section">
+          <div class="layer-name">Safety (6)</div>
+          <div id="nodes-safety" class="node-grid">
+            <div title="S1" data-nid="S1" class="node active">1</div>
+            <div title="S2" data-nid="S2" class="node active">2</div>
+            <div title="S3" data-nid="S3" class="node active">3</div>
+            <div title="S4" data-nid="S4" class="node active">4</div>
+            <div title="S5" data-nid="S5" class="node active">5</div>
+            <div title="S6" data-nid="S6" class="node active">6</div>
+          </div>
+        </div>
+      </div><!-- Layer Health Bars -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>LAYER HEALTH
+        </div>
+        <div id="layerBars">
+          <div class="bar-row">
+            <div class="bar-label">PERCEPTION</div>
+            <div class="bar-track">
+              <div class="bar-fill c4290"></div>
+            </div>
+            <div class="bar-val c4310">92%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">MEMORY</div>
+            <div class="bar-track">
+              <div class="bar-fill c4363"></div>
+            </div>
+            <div class="bar-val c4382">86%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">SWARM</div>
+            <div class="bar-track">
+              <div class="bar-fill c4434"></div>
+            </div>
+            <div class="bar-val c4453">85%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">EMMA</div>
+            <div class="bar-track">
+              <div class="bar-fill c4505"></div>
+            </div>
+            <div class="bar-val c4524">99%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">LUCY PRIME</div>
+            <div class="bar-track">
+              <div class="bar-fill c4576"></div>
+            </div>
+            <div class="bar-val c4595">99%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">INFRASTRUCTURE</div>
+            <div class="bar-track">
+              <div class="bar-fill c4647"></div>
+            </div>
+            <div class="bar-val c4666">97%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">OUTPUT</div>
+            <div class="bar-track">
+              <div class="bar-fill c4718"></div>
+            </div>
+            <div class="bar-val c4737">90%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">SAFETY</div>
+            <div class="bar-track">
+              <div class="bar-fill c4789"></div>
+            </div>
+            <div class="bar-val c4808">98%</div>
+          </div>
+        </div>
+      </div><!-- Upgrade Feed -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>UPGRADE PROPOSALS
+        </div>
+        <div id="upgradesFeed">
+          <div class="upgrade-item"><span class="mod">emma_mesh</span><span class="c4913"> — E11 attention blend
+              tune</span><br /><span class="status-ok c4940">ACCEPTED</span><span class="c4959"> ● conf 0.88</span>
+          </div>
+          <div class="upgrade-item"><span class="mod">swarm</span><span class="c5016"> — L17 creative agent
+              boost</span><br /><span class="status-pend c5043">PENDING</span><span class="c5062"> ● conf 0.72</span>
+          </div>
+          <div class="upgrade-item"><span class="mod">lucy_prime</span><span class="c5119"> — LP7 consistency
+              threshold</span><br /><span class="status-ok c5146">ACCEPTED</span><span class="c5164"> ● conf 0.91</span>
+          </div>
+          <div class="upgrade-item"><span class="mod">memory</span><span class="c5221"> — Episodic write gate
+              +LTE</span><br /><span class="status-pend c5248">PENDING</span><span class="c5266"> ● conf 0.65</span>
+          </div>
+          <div class="upgrade-item"><span class="mod">bioyth0n</span><span class="c5323"> — Gate confidence floor
+              0.70</span><br /><span class="status-ok c5350">ACCEPTED</span><span class="c5368"> ● conf 0.95</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- ══════ CENTER COLUMN ══════ -->
+    <div class="col"><!-- Top Metrics -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>SYSTEM VITALS
+        </div>
+        <div class="full-metrics">
+          <div class="metric-tile">
+            <div id="metLTE" class="metric-val">75</div>
+            <div class="metric-label">LTE SCORE</div>
+          </div>
+          <div class="metric-tile">
+            <div id="metConf" class="metric-val green">62.1%</div>
+            <div class="metric-label">CONFIDENCE</div>
+          </div>
+          <div class="metric-tile">
+            <div id="metLatency" class="metric-val amber">90ms</div>
+            <div class="metric-label">EMMA LATENCY</div>
+          </div>
+          <div class="metric-tile">
+            <div id="metConsensus" class="metric-val">STRONG</div>
+            <div class="metric-label">CONSENSUS</div>
+          </div>
+        </div>
+        <div class="sub-metrics">
+          <div class="metric-tile">
+            <div id="metPlayers" class="metric-val green">12</div>
+            <div class="metric-label">FIVEM PLAYERS</div>
+          </div>
+          <div class="metric-tile">
+            <div id="metAgentLoad" class="metric-val">45%</div>
+            <div class="metric-label">SWARM LOAD</div>
+          </div>
+          <div class="metric-tile">
+            <div id="metBlocks" class="metric-val amber">1</div>
+            <div class="metric-label">SAFETY BLOCKS</div>
+          </div>
+        </div>
+      </div><!-- Canvas Mesh Visualiser -->
+      <div class="panel c5828">
+        <div class="canvas-overlay">◈ COGNITIVE FLOW — REAL-TIME DAG</div>
+        <div class="scan-line"></div><canvas id="meshCanvas" width="131" height="298"></canvas>
+        <div class="canvas-legend">
+          <div class="legend-item">
+            <div class="legend-dot c5877"></div>Active
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot c5909"></div>Processing
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot c5940"></div>Emma
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot c5971"></div>Lucy
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot c6002"></div>Blocked
+          </div>
+        </div>
+      </div><!-- Agent Heatmap -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>SWARM AGENT LOAD HEATMAP (L1–L48)
+        </div>
+        <div id="swarmHeatmap" class="heatmap-grid">
+          <div title="L1: 100% load" class="heat-cell c6085">L1</div>
+          <div title="L2: 55% load" class="heat-cell c6104">L2</div>
+          <div title="L3: 47% load" class="heat-cell c6122">L3</div>
+          <div title="L4: 61% load" class="heat-cell c6140">L4</div>
+          <div title="L5: 5% load" class="heat-cell c6158">L5</div>
+          <div title="L6: 4% load" class="heat-cell c6176">L6</div>
+          <div title="L7: 59% load" class="heat-cell c6194">L7</div>
+          <div title="L8: 19% load" class="heat-cell c6212">L8</div>
+          <div title="L9: 49% load" class="heat-cell c6230">L9</div>
+          <div title="L10: 32% load" class="heat-cell c6248">L10</div>
+          <div title="L11: 25% load" class="heat-cell c6266">L11</div>
+          <div title="L12: 12% load" class="heat-cell c6284">L12</div>
+          <div title="L13: 34% load" class="heat-cell c6302">L13</div>
+          <div title="L14: 18% load" class="heat-cell c6320">L14</div>
+          <div title="L15: 74% load" class="heat-cell c6338">L15</div>
+          <div title="L16: 97% load" class="heat-cell c6356">L16</div>
+          <div title="L17: 54% load" class="heat-cell c6374">L17</div>
+          <div title="L18: 100% load" class="heat-cell c6392">L18</div>
+          <div title="L19: 57% load" class="heat-cell c6410">L19</div>
+          <div title="L20: 68% load" class="heat-cell c6428">L20</div>
+          <div title="L21: 68% load" class="heat-cell c6446">L21</div>
+          <div title="L22: 18% load" class="heat-cell c6464">L22</div>
+          <div title="L23: 26% load" class="heat-cell c6482">L23</div>
+          <div title="L24: 33% load" class="heat-cell c6500">L24</div>
+          <div title="L25: 43% load" class="heat-cell c6518">L25</div>
+          <div title="L26: 57% load" class="heat-cell c6536">L26</div>
+          <div title="L27: 26% load" class="heat-cell c6554">L27</div>
+          <div title="L28: 14% load" class="heat-cell c6572">L28</div>
+          <div title="L29: 81% load" class="heat-cell c6590">L29</div>
+          <div title="L30: 80% load" class="heat-cell c6608">L30</div>
+          <div title="L31: 0% load" class="heat-cell c6626">L31</div>
+          <div title="L32: 61% load" class="heat-cell c6644">L32</div>
+          <div title="L33: 54% load" class="heat-cell c6662">L33</div>
+          <div title="L34: 75% load" class="heat-cell c6680">L34</div>
+          <div title="L35: 74% load" class="heat-cell c6698">L35</div>
+          <div title="L36: 75% load" class="heat-cell c6716">L36</div>
+          <div title="L37: 27% load" class="heat-cell c6734">L37</div>
+          <div title="L38: 31% load" class="heat-cell c6752">L38</div>
+          <div title="L39: 100% load" class="heat-cell c6770">L39</div>
+          <div title="L40: 76% load" class="heat-cell c6788">L40</div>
+          <div title="L41: 97% load" class="heat-cell c6806">L41</div>
+          <div title="L42: 87% load" class="heat-cell c6824">L42</div>
+          <div title="L43: 100% load" class="heat-cell c6842">L43</div>
+          <div title="L44: 69% load" class="heat-cell c6860">L44</div>
+          <div title="L45: 89% load" class="heat-cell c6878">L45</div>
+          <div title="L46: 14% load" class="heat-cell c6896">L46</div>
+          <div title="L47: 83% load" class="heat-cell c6914">L47</div>
+          <div title="L48: 5% load" class="heat-cell c6932">L48</div>
+        </div>
+      </div><!-- Log Stream -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>LIVE EVENT LOG
+        </div>
+        <div id="logStream" class="log-stream">
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-ok">OK</span>Lucy OS v5 dashboard
+            initialised</div>
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-info">INFO</span>137-node cognitive
+            mesh online</div>
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-ok">OK</span>EventBus started —
+            strict async pub/sub</div>
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-info">INFO</span>Emma E1-E24
+            pipeline
+            ready</div>
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-ok">OK</span>Bioyth0n blind
+            executor
+            armed</div>
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-info">INFO</span>DeltaVault SHA-256
+            chain verified</div>
+          <div class="log-line"><span class="ts">22:19:42</span><span class="tag tag-ok">OK</span>All dashboard systems
+            active</div>
+          <div class="log-line"><span class="ts">22:19:44</span><span class="tag tag-block">BLOCK</span>Eagle Eye
+            trusted
+            gate opened</div>
+          <div class="log-line"><span class="ts">22:19:47</span><span class="tag tag-info">INFO</span>DeltaVault SHA-256
+            chain verified</div>
+          <div class="log-line"><span class="ts">22:19:49</span><span class="tag tag-ok">OK</span>Swarm L23 completed
+            analytical task</div>
+          <div class="log-line"><span class="ts">22:19:51</span><span class="tag tag-ok">OK</span>Emma E7 confidence
+            scored 0.84</div>
+          <div class="log-line"><span class="ts">22:19:53</span><span class="tag tag-info">INFO</span>Memory episodic
+            write LTE≥60 passed</div>
+          <div class="log-line"><span class="ts">22:19:55</span><span class="tag tag-info">INFO</span>Eagle Eye trusted
+            gate opened</div>
+          <div class="log-line"><span class="ts">22:19:58</span><span class="tag tag-info">INFO</span>Memory episodic
+            write LTE≥60 passed</div>
+          <div class="log-line"><span class="ts">22:20:00</span><span class="tag tag-warn">WARN</span>Emma E7 confidence
+            scored 0.84</div>
+          <div class="log-line"><span class="ts">22:20:02</span><span class="tag tag-info">INFO</span>Swarm L1-L16
+            analytical consensus reached</div>
+          <div class="log-line"><span class="ts">22:20:04</span><span class="tag tag-info">INFO</span>TwinEarth SimA
+            projection computed</div>
+          <div class="log-line"><span class="ts">22:20:06</span><span class="tag tag-ok">OK</span>LP11 state: nominal
+          </div>
+          <div class="log-line"><span class="ts">22:20:09</span><span class="tag tag-ok">OK</span>EventBus delivered 42
+            events/sec</div>
+          <div class="log-line"><span class="ts">22:20:11</span><span class="tag tag-ok">OK</span>Memory episodic write
+            LTE≥60 passed</div>
+          <div class="log-line"><span class="ts">22:20:13</span><span class="tag tag-ok">OK</span>Swarm L23 completed
+            analytical task</div>
+          <div class="log-line"><span class="ts">22:20:15</span><span class="tag tag-warn">WARN</span>TwinEarth SimA
+            projection computed</div>
+          <div class="log-line"><span class="ts">22:20:17</span><span class="tag tag-info">INFO</span>Bioyth0n executed
+            file_write_module</div>
+          <div class="log-line"><span class="ts">22:20:20</span><span class="tag tag-block">BLOCK</span>TwinEarth SimA
+            projection computed</div>
+          <div class="log-line"><span class="ts">22:20:22</span><span class="tag tag-info">INFO</span>DeltaVault SHA-256
+            chain verified</div>
+          <div class="log-line"><span class="ts">22:20:24</span><span class="tag tag-ok">OK</span>Safety E19 risk score
+            0.12 — PASS</div>
+          <div class="log-line"><span class="ts">22:20:26</span><span class="tag tag-ok">OK</span>E14 softmax confidence
+            merged 0.79</div>
+          <div class="log-line"><span class="ts">22:20:28</span><span class="tag tag-info">INFO</span>Perception parsed
+            domain: reasoning</div>
+          <div class="log-line"><span class="ts">22:20:31</span><span class="tag tag-warn">WARN</span>FiveM bridge
+            heartbeat OK</div>
+          <div class="log-line"><span class="ts">22:20:33</span><span class="tag tag-block">BLOCK</span>DeltaVault
+            SHA-256
+            chain verified</div>
+          <div class="log-line"><span class="ts">22:20:35</span><span class="tag tag-ok">OK</span>Swarm L1-L16
+            analytical
+            consensus reached</div>
+          <div class="log-line"><span class="ts">22:20:37</span><span class="tag tag-ok">OK</span>Earth freshness score
+            0.93</div>
+        </div>
+      </div>
+    </div><!-- ══════ RIGHT COLUMN ══════ -->
+    <div class="col"><!-- LTE Gauge -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>LTE SCORE ENGINE
+        </div>
+        <div class="lte-gauge-wrap"><canvas id="lteGauge" width="160" height="90"></canvas>
+          <div id="lteGradeLabel" class="lte-grade c9018">B</div>
+          <div id="lteRawLabel" class="lte-raw">Score: 75 / 100</div>
+        </div>
+      </div><!-- Personality Radar -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>LUCY PERSONALITY MESH
+        </div><canvas id="spiderCanvas" width="220" height="180"></canvas>
+      </div><!-- Emma Pipeline Bars -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>EMMA PIPELINE (E1–E24)
+        </div>
+        <div id="emmaBars">
+          <div class="bar-row">
+            <div class="bar-label c9171">Router (E1-E6)</div>
+            <div class="bar-track">
+              <div class="bar-fill c9192"></div>
+            </div>
+            <div class="bar-val c9211">81%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label c9246">Evaluator (E7-E12)</div>
+            <div class="bar-track">
+              <div class="bar-fill c9267"></div>
+            </div>
+            <div class="bar-val c9286">82%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label c9321">Merger (E13-E16)</div>
+            <div class="bar-track">
+              <div class="bar-fill c9342"></div>
+            </div>
+            <div class="bar-val c9361">89%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label c9396">Safety (E17-E20)</div>
+            <div class="bar-track">
+              <div class="bar-fill c9417"></div>
+            </div>
+            <div class="bar-val c9436">91%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label c9471">Auditor (E21-E24)</div>
+            <div class="bar-track">
+              <div class="bar-fill c9492"></div>
+            </div>
+            <div class="bar-val c9511">82%</div>
+          </div>
+        </div>
+      </div><!-- Consensus Rings -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>CONSENSUS DISTRIBUTION
+        </div>
+        <div class="consensus-rings">
+          <div class="ring"><canvas id="ringStrong" width="70" height="70"></canvas>
+            <div class="ring-label">STRONG</div>
+          </div>
+          <div class="ring"><canvas id="ringPartial" width="70" height="70"></canvas>
+            <div class="ring-label">PARTIAL</div>
+          </div>
+          <div class="ring"><canvas id="ringDivergent" width="70" height="70"></canvas>
+            <div class="ring-label">DIVERGENT</div>
+          </div>
+        </div>
+      </div><!-- Chat -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>LUCY CHAT
+        </div>
+        <div class="chat-panel">
+          <div id="chatMessages" class="chat-messages">
+            <div class="chat-msg lucy">
+              <div class="name">LUCY ●</div>
+              <div class="body">137-node cognitive mesh online. I am ready.</div>
+            </div>
+          </div>
+          <div class="chat-input-row"><input id="chatInput" type="text" placeholder="Query Lucy…" autocomplete="off"
+              class="chat-input" /><button id="chatSend" class="chat-send">SEND</button></div>
+        </div>
+      </div><!-- FiveM Status -->
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>FIVEM BRIDGE
+        </div>
+        <div class="metric-grid">
+          <div class="metric-tile">
+            <div id="fivemPlayers" class="metric-val green">12</div>
+            <div class="metric-label">PLAYERS</div>
+          </div>
+          <div class="metric-tile">
+            <div id="fivemLatency" class="metric-val amber">72</div>
+            <div class="metric-label">LATENCY (ms)</div>
+          </div>
+        </div>
+        <div id="fivemResources" class="c10011">Resources: loading…</div>
+      </div>
+    </div>
+  </div><!-- ═══ TOOLTIP ═══ -->
+
+     <!-- NVIDIA EARTH-2 TWIN EARTH — FULL WIDTH BOTTOM ROW -->
+     <div id="earth2Section" class="earth2-section">
+       <div class="earth2-header">
+         <div class="earth2-title-group">
+           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+           <span class="earth2-title">Earth 2 & Live VR <span class="earth2-subtitle">Omniverse Twin</span></span>
+           <span class="earth2-badge nvidia">NVIDIA EARTH-2</span>
+           <span class="earth2-badge">CESIUM USD</span>
+           <span class="earth2-badge green">DELTAVAULT</span>
+         </div>
+         <div class="earth2-header-badges">
+           <span class="earth2-badge mono">GIBS WMTS: SYNCED</span>
+           <span class="earth2-badge mono">FourCastNet: READY</span>
+           <span id="e2FeedStatus" class="earth2-badge green mono pulse-badge">&#9685; POLLING</span>
+         </div>
+       </div>
+       <div class="earth2-body">
+         <div class="earth2-globe-col" id="earth2GlobeCol">
+           <div class="earth2-globe-container" id="earth2GlobeContainer">
+             <div class="earth2-globe-badge top-left"><span class="live-dot"></span>VR VIEWPORT LIVE</div>
+             <button id="e2ExpandBtn" class="earth2-expand-btn" title="Expand Globe">&#10178;</button>
+             <canvas id="earth2Canvas" class="earth2-canvas"></canvas>
+             <div id="terminatorOverlay" class="terminator-overlay"></div>
+             <div class="earth2-globe-footer">
+               <span class="earth2-badge mono">NASA GIBS <span style="color:#10b981">ON</span></span>
+               <span class="earth2-badge mono">TERM LIGHTING <span style="color:#10b981">ON</span></span>
+               <span id="e2FlightCount" class="earth2-badge mono">ADS-B: 0 flights</span>
+             </div>
+           </div>
+           <div class="earth2-nims-panel">
+             <div class="panel-title"><div class="dot"></div>NVIDIA NIMs / EMMA Bridge</div>
+             <div class="nims-grid">
+               <div class="nims-row"><span>Modulus/PhysicsNeMo:</span><span style="color:#10b981">READY</span></div>
+               <div class="nims-row"><span>Forecast Horizon:</span><span style="color:#e2e8f0">15 DAYS</span></div>
+               <div class="nims-row"><span>CUDA Device:</span><span style="color:#60a5fa">A100-SXM</span></div>
+               <div class="nims-row"><span>Export Format:</span><span style="color:#e2e8f0">OpenUSD</span></div>
+               <div class="nims-row"><span>Pangu-Weather:</span><span style="color:#10b981">ACTIVE</span></div>
+               <div class="nims-row"><span>DeltaVault Sync:</span><span style="color:#10b981">LIVE</span></div>
+             </div>
+           </div>
+         </div>
+         <div class="earth2-feed-col">
+           <div class="earth2-feed-header">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+             LIVE INGESTION PIPELINE
+             <span id="e2FeedCount" class="earth2-badge mono" style="margin-left:auto">0 events</span>
+           </div>
+           <div id="earth2Feed" class="earth2-feed-list"></div>
+         </div>
+         <div class="earth2-scenario-col">
+           <div class="earth2-scenario-header">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+             Earth-2 Predictive Simulation
+           </div>
+           <p class="earth2-scenario-sub">Inject Prompts into Omniverse USD Baseline</p>
+           <div class="earth2-form-group">
+             <label>Location Target (Lat/Lon or Name)</label>
+             <input id="e2LocationInput" type="text" placeholder="e.g. 34.05N, -118.24W (Los Angeles Basin)" class="earth2-input" />
+           </div>
+           <div class="earth2-form-group">
+             <label>Physical Modification Prompt</label>
+             <textarea id="e2ScenarioInput" class="earth2-textarea" placeholder="e.g. Inject massive thermal anomaly. Measure NOAA geomagnetic response and calculate 15-day climate deviation via Earth-2 Pangu-Weather model."></textarea>
+           </div>
+           <button id="e2RunBtn" class="earth2-run-btn">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+             INJECT INTO TWIN EARTH
+           </button>
+           <div id="e2ProgressBar" class="earth2-progress-wrap" style="display:none">
+             <div class="earth2-progress-label"><span>Omniverse GPU Render Stream</span><span id="e2ProgressPct">0%</span></div>
+             <div class="earth2-progress-track"><div id="e2ProgressFill" class="earth2-progress-fill"></div></div>
+           </div>
+           <div id="e2Results" class="earth2-results" style="display:none">
+             <div class="earth2-results-header">
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+               Earth2Studio Results Ready
+             </div>
+             <p id="e2ResultText" class="earth2-results-body"></p>
+           </div>
+           <div class="earth2-stats-row">
+             <div class="earth2-stat-tile"><div id="e2SeismicCount" class="stat-val" style="color:#f59e0b;font-family:Courier New,monospace;font-size:18px;font-weight:700">0</div><div class="stat-label">SEISMIC</div></div>
+             <div class="earth2-stat-tile"><div id="e2SolarWind" class="stat-val" style="color:#06b6d4;font-family:Courier New,monospace;font-size:18px;font-weight:700">---</div><div class="stat-label">SOLAR km/s</div></div>
+             <div class="earth2-stat-tile"><div id="e2FlightStat" class="stat-val" style="color:#10b981;font-family:Courier New,monospace;font-size:18px;font-weight:700">0</div><div class="stat-label">ADS-B</div></div>
+             <div class="earth2-stat-tile"><div id="e2SimRuns" class="stat-val" style="color:#f1f5f9;font-family:Courier New,monospace;font-size:18px;font-weight:700">0</div><div class="stat-label">SIM RUNS</div></div>
+           </div>
+         </div>
+       </div>
+     </div><!-- END EARTH-2 -->
+  <div id="tooltip" class="tooltip c10060">Node: L12
+    Status: Active
+    Load: 30%</div><!-- ═══════════════════════════════════════════
+     JAVASCRIPT — LIVE DASHBOARD ENGINE
+     ═══════════════════════════════════════════ -->
+  <div>
+    <div id="ninja-daytona-banner" class="ninja-daytona-banner">
+      <div class="ninja-daytona-banner-preview-notice"><span>This website is a temporary preview.</span></div>
+      <div class="ninja-daytona-banner-connection-status"><span id="ninja-connection-spinner"
+          class="ninja-connection-status-spinner"></span><span id="ninja-connection-dot"
+          class="ninja-connection-status-dot connected"></span><span id="ninja-connection-text"
+          class="ninja-connection-status-text">Connected</span></div><button title="Close"
+        class="ninja-daytona-banner-close">×</button>
+    </div>
+  </div>
+  <div id="ninja-badge" class="ninja-badge"><a href="https://www.ninjatech.ai/product/super-ninja" target="_blank"><span
+        class="ninja-badge-emoji">🥷</span><span class="ninja-badge-text">Made by SuperNinja</span></a><button
+      title="Close" class="ninja-badge-close">×</button></div>
+  <div id="ninja-disconnect-overlay">
+    <div id="ninja-disconnect-overlay-text">Connection to Ninja computer lost.</div>
+    <div id="ninja-disconnect-overlay-text-2">Please reconnect to continue.</div><button
+      id="ninja-disconnect-reconnect-button"><span id="ninja-disconnect-spinner"></span><span
+        id="ninja-disconnect-button-text">Reconnect</span></button>
+  </div>
+  <script>
+    /* ── Config ── */
+    const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:8000'
+      : '';   // same-origin when served from backend
+    const POLL_MS = 1500;
+    
+    /* ── State ── */
+    const state = {
+      lte: 75, grade: 'B', conf: 0.78, latency: 120,
+      consensus: 'strong', blocked: false,
+      players: 12, agentLoad: 0.42, blocks: 1,
+      nodeStates: {},
+      queryCount: 0,
+      emmaPipeline: { router:0.88, evaluator:0.82, merger:0.79, safety:0.95, auditor:0.91 },
+      consensus_dist: { strong: 0.62, partial: 0.28, divergent: 0.10 },
+      personality: { curiosity:0.90, empathy:0.85, resilience:0.95, autonomy:0.90,
+                     creativity:0.82, precision:0.88, adaptability:0.86, integrity:0.97 },
+      upgrades: [],
+      layers: {
+        perception:12, memory:18, swarm:48, emma:24,
+        lucy_prime:12, infrastructure:10, output:7, safety:6
+      },
+      layerHealth: {
+        perception:95, memory:92, swarm:88, emma:97,
+        lucy_prime:99, infrastructure:91, output:96, safety:100
+      }
+    };
+    
+    /* ════════════════════════════════════════
+       NODE MAP BUILDER
+       ════════════════════════════════════════ */
+    const layerDefs = [
+      { id:'perception',     count:12,  label:'P', cls:'active'  },
+      { id:'memory',         count:18,  label:'M', cls:'active'  },
+      { id:'swarm',          count:48,  label:'L', cls:'active'  },
+      { id:'emma',           count:24,  label:'E', cls:'emma'    },
+      { id:'lucy',           count:12,  label:'LP',cls:'lucy'    },
+      { id:'infra',          count:10,  label:'I', cls:'active'  },
+      { id:'output',         count:7,   label:'O', cls:'active'  },
+      { id:'safety',         count:6,   label:'S', cls:'active'  },
+    ];
+    
+    function buildNodeMap() {
+      layerDefs.forEach(layer => {
+        const container = document.getElementById(`nodes-${layer.id}`);
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 1; i <= layer.count; i++) {
+          const n = document.createElement('div');
+          const nid = `${layer.label}${i}`;
+          n.className = `node ${layer.cls}`;
+          n.textContent = i;
+          n.title = nid;
+          n.dataset.nid = nid;
+          n.addEventListener('mouseenter', e => showTooltip(e, nid));
+          n.addEventListener('mouseleave', hideTooltip);
+          n.addEventListener('click', () => activateNode(nid));
+          container.appendChild(n);
+          state.nodeStates[nid] = layer.cls;
+        }
+      });
+    }
+    
+    function activateNode(nid) {
+      addLog('info', `Node ${nid} selected`);
+    }
+    
+    /* ════════════════════════════════════════
+       CANVAS MESH DAG VISUALISER
+       ════════════════════════════════════════ */
+    const canvasEl = document.getElementById('meshCanvas');
+    const ctx = canvasEl.getContext('2d');
+    let particles = [];
+    let flowLines = [];
+    let animFrame;
+    
+    function resizeCanvas() {
+      const wrap = canvasEl.parentElement;
+      canvasEl.width  = wrap.clientWidth;
+      canvasEl.height = wrap.clientHeight;
+    }
+    
+    // DAG layer positions
+    function getLayerNodes() {
+      const W = canvasEl.width, H = canvasEl.height;
+      const layers = [
+        { name:'Perception',     count:12, y: H*0.08, color:'#00d4ff' },
+        { name:'Memory',         count:8,  y: H*0.20, color:'#38bdf8' },
+        { name:'Swarm',          count:10, y: H*0.36, color:'#f59e0b' },
+        { name:'Emma',           count:8,  y: H*0.54, color:'#7c3aed' },
+        { name:'Lucy Prime',     count:5,  y: H*0.70, color:'#10b981' },
+        { name:'Output',         count:4,  y: H*0.84, color:'#34d399' },
+      ];
+      const nodes = [];
+      layers.forEach(layer => {
+        const spacing = W / (layer.count + 1);
+        for (let i = 0; i < layer.count; i++) {
+          nodes.push({
+            x: spacing * (i + 1),
+            y: layer.y,
+            color: layer.color,
+            layer: layer.name,
+            label: `${layer.name[0]}${i+1}`,
+            active: Math.random() > 0.2,
+            load: Math.random(),
+          });
+        }
+      });
+      return nodes;
+    }
+    
+    let dagNodes = [];
+    let dagEdges = [];
+    
+    function buildDAG() {
+      dagNodes = getLayerNodes();
+      dagEdges = [];
+      // Connect each node to 1-3 nodes in next layer
+      const layers = ['Perception','Memory','Swarm','Emma','Lucy Prime','Output'];
+      for (let li = 0; li < layers.length - 1; li++) {
+        const from = dagNodes.filter(n => n.layer === layers[li]);
+        const to   = dagNodes.filter(n => n.layer === layers[li+1]);
+        from.forEach(fn => {
+          const targets = to.sort(() => Math.random()-0.5).slice(0, Math.floor(Math.random()*3)+1);
+          targets.forEach(tn => dagEdges.push({ from: fn, to: tn, flow: 0, speed: 0.005 + Math.random()*0.01 }));
+        });
+      }
+    }
+    
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 30; i++) {
+        spawnParticle();
+      }
+    }
+    
+    function spawnParticle() {
+      if (dagEdges.length === 0) return;
+      const edge = dagEdges[Math.floor(Math.random() * dagEdges.length)];
+      particles.push({ edge, t: 0, speed: 0.008 + Math.random()*0.012, alpha: 1 });
+    }
+    
+    function drawMesh() {
+      const W = canvasEl.width, H = canvasEl.height;
+      ctx.clearRect(0, 0, W, H);
+    
+      // Grid background
+      ctx.strokeStyle = 'rgba(26,37,64,0.4)';
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    
+      // Edges
+      dagEdges.forEach(e => {
+        const grad = ctx.createLinearGradient(e.from.x, e.from.y, e.to.x, e.to.y);
+        grad.addColorStop(0, `${e.from.color}40`);
+        grad.addColorStop(1, `${e.to.color}40`);
+        ctx.beginPath();
+        ctx.moveTo(e.from.x, e.from.y);
+        ctx.lineTo(e.to.x, e.to.y);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+    
+      // Particles along edges
+      particles.forEach(p => {
+        p.t += p.speed;
+        if (p.t >= 1) { p.t = 0; }
+        const x = p.edge.from.x + (p.edge.to.x - p.edge.from.x) * p.t;
+        const y = p.edge.from.y + (p.edge.to.y - p.edge.from.y) * p.t;
+        const col = p.edge.from.color;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = col + 'cc';
+        ctx.fill();
+        // glow
+        const glowGrad = ctx.createRadialGradient(x, y, 0, x, y, 8);
+        glowGrad.addColorStop(0, col + '60');
+        glowGrad.addColorStop(1, 'transparent');
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = glowGrad;
+        ctx.fill();
+      });
+    
+      // Nodes
+      dagNodes.forEach(n => {
+        // pulse ring
+        const pulseR = 8 + Math.sin(Date.now() / 600 + n.x) * 2;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, pulseR, 0, Math.PI * 2);
+        ctx.strokeStyle = n.color + (n.active ? '60' : '20');
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // core dot
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 5, 0, Math.PI * 2);
+        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 5);
+        grad.addColorStop(0, n.color);
+        grad.addColorStop(1, n.color + '80');
+        ctx.fillStyle = grad;
+        ctx.fill();
+      });
+    
+      animFrame = requestAnimationFrame(drawMesh);
+    }
+    
+    /* ════════════════════════════════════════
+       LTE GAUGE
+       ════════════════════════════════════════ */
+    function drawLTEGauge(value) {
+      const canvas = document.getElementById('lteGauge');
+      const c = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      c.clearRect(0, 0, W, H);
+    
+      const cx = W / 2, cy = H - 10, r = 65;
+      const startA = Math.PI, endA = 2 * Math.PI;
+      const fillA  = startA + (value / 100) * Math.PI;
+    
+      // Background arc
+      c.beginPath();
+      c.arc(cx, cy, r, startA, endA);
+      c.strokeStyle = 'rgba(30,40,70,0.8)';
+      c.lineWidth = 12;
+      c.stroke();
+    
+      // Colour zones
+      const zones = [
+        { start: 0,  end: 0.40, color: '#ef4444' },
+        { start: 0.40, end: 0.55, color: '#f59e0b' },
+        { start: 0.55, end: 0.70, color: '#fcd34d' },
+        { start: 0.70, end: 0.80, color: '#34d399' },
+        { start: 0.80, end: 1.00, color: '#00d4ff' },
+      ];
+      zones.forEach(z => {
+        c.beginPath();
+        c.arc(cx, cy, r, startA + z.start * Math.PI, startA + z.end * Math.PI);
+        c.strokeStyle = z.color + '40';
+        c.lineWidth = 12;
+        c.stroke();
+      });
+    
+      // Fill arc
+      const grad = c.createLinearGradient(cx - r, cy, cx + r, cy);
+      grad.addColorStop(0, value >= 70 ? '#10b981' : value >= 40 ? '#f59e0b' : '#ef4444');
+      grad.addColorStop(1, '#00d4ff');
+      c.beginPath();
+      c.arc(cx, cy, r, startA, fillA);
+      c.strokeStyle = grad;
+      c.lineWidth = 12;
+      c.lineCap = 'round';
+      c.stroke();
+    
+      // Needle
+      const angle = startA + (value / 100) * Math.PI;
+      const nx = cx + (r) * Math.cos(angle);
+      const ny = cy + (r) * Math.sin(angle);
+      c.beginPath();
+      c.moveTo(cx, cy);
+      c.lineTo(nx, ny);
+      c.strokeStyle = '#ffffff';
+      c.lineWidth = 2;
+      c.stroke();
+    
+      // Centre dot
+      c.beginPath();
+      c.arc(cx, cy, 5, 0, Math.PI * 2);
+      c.fillStyle = '#00d4ff';
+      c.fill();
+    
+      // Value text
+      c.font = 'bold 18px Courier New';
+      c.fillStyle = '#e2e8f0';
+      c.textAlign = 'center';
+      c.fillText(Math.round(value), cx, cy - 22);
+    }
+    
+    /* ════════════════════════════════════════
+       SPIDER / RADAR — PERSONALITY
+       ════════════════════════════════════════ */
+    function drawSpider() {
+      const canvas = document.getElementById('spiderCanvas');
+      const c = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      c.clearRect(0, 0, W, H);
+    
+      const cx = W / 2, cy = H / 2, r = 72;
+      const traits = Object.entries(state.personality);
+      const n = traits.length;
+    
+      // Background rings
+      for (let ring = 1; ring <= 4; ring++) {
+        c.beginPath();
+        for (let i = 0; i < n; i++) {
+          const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+          const rr = r * (ring / 4);
+          const x = cx + rr * Math.cos(angle);
+          const y = cy + rr * Math.sin(angle);
+          i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+        }
+        c.closePath();
+        c.strokeStyle = 'rgba(26,37,64,0.8)';
+        c.lineWidth = 0.8;
+        c.stroke();
+      }
+    
+      // Spokes
+      traits.forEach((_, i) => {
+        const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+        c.beginPath();
+        c.moveTo(cx, cy);
+        c.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+        c.strokeStyle = 'rgba(26,37,64,0.8)';
+        c.lineWidth = 0.8;
+        c.stroke();
+      });
+    
+      // Data fill
+      c.beginPath();
+      traits.forEach(([, val], i) => {
+        const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+        const rr = r * val;
+        const x = cx + rr * Math.cos(angle);
+        const y = cy + rr * Math.sin(angle);
+        i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+      });
+      c.closePath();
+      const grad = c.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0, 'rgba(0,212,255,0.4)');
+      grad.addColorStop(1, 'rgba(124,58,237,0.2)');
+      c.fillStyle = grad;
+      c.fill();
+      c.strokeStyle = '#00d4ff';
+      c.lineWidth = 1.5;
+      c.stroke();
+    
+      // Dots + labels
+      traits.forEach(([name, val], i) => {
+        const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+        const rr = r * val;
+        const x = cx + rr * Math.cos(angle);
+        const y = cy + rr * Math.sin(angle);
+        c.beginPath();
+        c.arc(x, y, 3, 0, Math.PI * 2);
+        c.fillStyle = '#00d4ff';
+        c.fill();
+    
+        // Label
+        const lx = cx + (r + 14) * Math.cos(angle);
+        const ly = cy + (r + 14) * Math.sin(angle);
+        c.font = '8px Courier New';
+        c.fillStyle = '#64748b';
+        c.textAlign = 'center';
+        c.fillText(name.slice(0,5).toUpperCase(), lx, ly + 3);
+      });
+    }
+    
+    /* ════════════════════════════════════════
+       RING CHARTS — CONSENSUS
+       ════════════════════════════════════════ */
+    function drawRing(canvasId, value, color, label) {
+      const canvas = document.getElementById(canvasId);
+      const c = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      c.clearRect(0, 0, W, H);
+    
+      const cx = W / 2, cy = H / 2, r = 28;
+      // Background
+      c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2);
+      c.strokeStyle = 'rgba(30,40,70,0.8)'; c.lineWidth = 8; c.stroke();
+      // Fill
+      c.beginPath();
+      c.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + value * Math.PI * 2);
+      c.strokeStyle = color; c.lineWidth = 8; c.lineCap = 'round'; c.stroke();
+      // Text
+      c.font = 'bold 12px Courier New';
+      c.fillStyle = color;
+      c.textAlign = 'center';
+      c.fillText(Math.round(value * 100) + '%', cx, cy + 4);
+    }
+    
+    function updateConsensusRings() {
+      drawRing('ringStrong',    state.consensus_dist.strong,    '#10b981', 'STRONG');
+      drawRing('ringPartial',   state.consensus_dist.partial,   '#f59e0b', 'PARTIAL');
+      drawRing('ringDivergent', state.consensus_dist.divergent, '#ef4444', 'DIVERGENT');
+    }
+    
+    /* ════════════════════════════════════════
+       LAYER HEALTH BARS
+       ════════════════════════════════════════ */
+    function buildLayerBars() {
+      const container = document.getElementById('layerBars');
+      container.innerHTML = '';
+      Object.entries(state.layerHealth).forEach(([name, pct]) => {
+        const color = pct >= 90 ? '#10b981' : pct >= 70 ? '#f59e0b' : '#ef4444';
+        container.innerHTML += `
+          <div class="bar-row">
+            <div class="bar-label">${name.replace('_',' ').toUpperCase()}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${color}80,${color});"></div>
+            </div>
+            <div class="bar-val" style="color:${color}">${pct}%</div>
+          </div>`;
+      });
+    }
+    
+    /* ════════════════════════════════════════
+       EMMA PIPELINE BARS
+       ════════════════════════════════════════ */
+    function buildEmmaBars() {
+      const container = document.getElementById('emmaBars');
+      const stages = [
+        { name:'Router (E1-E6)',    key:'router',    color:'#00d4ff' },
+        { name:'Evaluator (E7-E12)',key:'evaluator', color:'#38bdf8' },
+        { name:'Merger (E13-E16)', key:'merger',    color:'#7c3aed' },
+        { name:'Safety (E17-E20)', key:'safety',    color:'#10b981' },
+        { name:'Auditor (E21-E24)',key:'auditor',   color:'#f59e0b' },
+      ];
+      container.innerHTML = '';
+      stages.forEach(s => {
+        const pct = Math.round(state.emmaPipeline[s.key] * 100);
+        container.innerHTML += `
+          <div class="bar-row">
+            <div class="bar-label" style="width:110px">${s.name}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%;background:${s.color}80;border-right:2px solid ${s.color};"></div>
+            </div>
+            <div class="bar-val" style="color:${s.color}">${pct}%</div>
+          </div>`;
+      });
+    }
+    
+    /* ════════════════════════════════════════
+       SWARM HEATMAP
+       ════════════════════════════════════════ */
+    let swarmLoads = Array.from({length:48}, () => Math.random());
+    
+    function buildSwarmHeatmap() {
+      const container = document.getElementById('swarmHeatmap');
+      container.innerHTML = '';
+      swarmLoads.forEach((load, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'heat-cell';
+        cell.textContent = `L${i+1}`;
+        const h = Math.round((1 - load) * 120);
+        const s = 80, l = 35;
+        cell.style.background = `hsla(${h}, ${s}%, ${l}%, 0.8)`;
+        cell.style.color = load > 0.7 ? '#fff' : '#ccc';
+        cell.title = `L${i+1}: ${Math.round(load*100)}% load`;
+        container.appendChild(cell);
+      });
+    }
+    
+    function updateSwarmHeatmap() {
+      swarmLoads = swarmLoads.map(v => Math.max(0, Math.min(1, v + (Math.random()-0.5)*0.12)));
+      buildSwarmHeatmap();
+    }
+    
+    /* ════════════════════════════════════════
+       UPGRADE FEED
+       ════════════════════════════════════════ */
+    const upgradeData = [
+      { mod:'emma_mesh',  desc:'E11 attention blend tune', status:'ACCEPTED', conf:0.88 },
+      { mod:'swarm',      desc:'L17 creative agent boost',  status:'PENDING',  conf:0.72 },
+      { mod:'lucy_prime', desc:'LP7 consistency threshold', status:'ACCEPTED', conf:0.91 },
+      { mod:'memory',     desc:'Episodic write gate +LTE', status:'PENDING',  conf:0.65 },
+      { mod:'bioyth0n',   desc:'Gate confidence floor 0.70',status:'ACCEPTED', conf:0.95 },
+    ];
+    
+    function buildUpgradeFeed() {
+      const container = document.getElementById('upgradesFeed');
+      container.innerHTML = '';
+      upgradeData.forEach(u => {
+        const cls = u.status === 'ACCEPTED' ? 'status-ok' : 'status-pend';
+        container.innerHTML += `
+          <div class="upgrade-item">
+            <span class="mod">${u.mod}</span>
+            <span style="color:var(--text-mid);"> — ${u.desc}</span><br/>
+            <span class="${cls}" style="font-size:9px">${u.status}</span>
+            <span style="color:var(--text-dim);font-size:9px"> ● conf ${u.conf.toFixed(2)}</span>
+          </div>`;
+      });
+    }
+    
+    /* ════════════════════════════════════════
+       LOG STREAM
+       ════════════════════════════════════════ */
+    const LOG_TYPES = [
+      { tag:'INFO',   cls:'tag-info',  weight:6 },
+      { tag:'OK',     cls:'tag-ok',    weight:4 },
+      { tag:'WARN',   cls:'tag-warn',  weight:2 },
+      { tag:'BLOCK',  cls:'tag-block', weight:1 },
+    ];
+    const LOG_MSGS = [
+      'Emma E7 confidence scored 0.84',
+      'Swarm L23 completed analytical task',
+      'Memory episodic write LTE≥60 passed',
+      'Eagle Eye trusted gate opened',
+      'Bioyth0n executed file_write_module',
+      'FiveM bridge heartbeat OK',
+      'Earth freshness score 0.93',
+      'DeltaVault SHA-256 chain verified',
+      'LP11 state: nominal',
+      'Perception parsed domain: reasoning',
+      'E14 softmax confidence merged 0.79',
+      'Safety E19 risk score 0.12 — PASS',
+      'Swarm L1-L16 analytical consensus reached',
+      'TwinEarth SimA projection computed',
+      'EventBus delivered 42 events/sec',
+      'LP10 reflection trigger: low_lte suppressed',
+      'Lucidity gravity score 0.08 — ALLOW',
+      'LTE score 78.3 — Grade B',
+    ];
+    
+    function addLog(type, msg) {
+      const stream = document.getElementById('logStream');
+      const now = new Date();
+      const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+      const typeMap = { info:'tag-info', ok:'tag-ok', warn:'tag-warn', block:'tag-block' };
+      const cls = typeMap[type] || 'tag-info';
+      const tag = type.toUpperCase();
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="ts">${ts}</span><span class="tag ${cls}">${tag}</span>${msg}`;
+      stream.appendChild(line);
+      stream.scrollTop = stream.scrollHeight;
+      // Keep last 80 lines
+      while (stream.children.length > 80) stream.removeChild(stream.firstChild);
+    }
+    
+    function autoLog() {
+      const weighted = [];
+      LOG_TYPES.forEach(t => { for (let i = 0; i < t.weight; i++) weighted.push(t); });
+      const t = weighted[Math.floor(Math.random() * weighted.length)];
+      const msg = LOG_MSGS[Math.floor(Math.random() * LOG_MSGS.length)];
+      addLog(t.tag.toLowerCase(), msg);
+    }
+    
+    /* ════════════════════════════════════════
+       NODE STATE ANIMATION
+       ════════════════════════════════════════ */
+    function animateNodes() {
+      layerDefs.forEach(layer => {
+        const container = document.getElementById(`nodes-${layer.id}`);
+        if (!container) return;
+        const nodes = container.querySelectorAll('.node');
+        // Randomly toggle 1-2 nodes to busy/active
+        const idx = Math.floor(Math.random() * nodes.length);
+        const node = nodes[idx];
+        const baseClass = layer.cls;
+        if (Math.random() < 0.3) {
+          node.classList.remove('active','emma','lucy','idle');
+          node.classList.add('busy');
+          setTimeout(() => {
+            node.classList.remove('busy');
+            node.classList.add(baseClass);
+          }, 800 + Math.random() * 1200);
+        }
+      });
+    }
+    
+    /* ════════════════════════════════════════
+       METRIC UPDATES
+       ════════════════════════════════════════ */
+    function jitter(val, range, min=0, max=100) {
+      return Math.max(min, Math.min(max, val + (Math.random()-0.5)*range));
+    }
+    
+    function updateMetrics() {
+      // Simulate live data (replaced by real API when available)
+      state.lte     = jitter(state.lte, 4, 0, 100);
+      state.conf    = jitter(state.conf, 0.04, 0, 1);
+      state.latency = jitter(state.latency, 20, 10, 800);
+      state.agentLoad = jitter(state.agentLoad, 0.05, 0, 1);
+    
+      // Consensus drift
+      state.consensus_dist.strong   = jitter(state.consensus_dist.strong,   0.02, 0.3, 0.85);
+      state.consensus_dist.partial  = jitter(state.consensus_dist.partial,  0.02, 0.1, 0.5);
+      state.consensus_dist.divergent = 1 - state.consensus_dist.strong - state.consensus_dist.partial;
+      state.consensus_dist.divergent = Math.max(0.02, Math.min(0.20, state.consensus_dist.divergent));
+    
+      // Emma pipeline jitter
+      Object.keys(state.emmaPipeline).forEach(k => {
+        state.emmaPipeline[k] = jitter(state.emmaPipeline[k], 0.03, 0.5, 1.0);
+      });
+    
+      // Layer health jitter
+      Object.keys(state.layerHealth).forEach(k => {
+        state.layerHealth[k] = Math.round(jitter(state.layerHealth[k], 2, 70, 100));
+      });
+    
+      // Grade
+      const lte = state.lte;
+      state.grade = lte>=90?'S':lte>=80?'A':lte>=70?'B':lte>=55?'C':lte>=40?'D':'F';
+      const gradeColor = lte>=80?'var(--accent3)':lte>=55?'var(--accent4)':'var(--accent5)';
+    
+      // DOM updates
+      el('metLTE').textContent       = Math.round(state.lte);
+      el('metConf').textContent      = (state.conf*100).toFixed(1)+'%';
+      el('metLatency').textContent   = Math.round(state.latency)+'ms';
+      el('metConsensus').textContent = state.consensus_dist.strong >= 0.6 ? 'STRONG' : state.consensus_dist.partial >= 0.4 ? 'PARTIAL' : 'DIVERGENT';
+      el('metPlayers').textContent   = state.players;
+      el('metAgentLoad').textContent = (state.agentLoad*100).toFixed(0)+'%';
+      el('metBlocks').textContent    = state.blocks;
+      el('headerLTE').textContent    = Math.round(state.lte);
+      el('fivemPlayers').textContent = state.players;
+      el('fivemLatency').textContent = Math.round(state.latency * 0.8);
+      el('lteGradeLabel').textContent = state.grade;
+      el('lteRawLabel').textContent  = `Score: ${Math.round(state.lte)} / 100`;
+      el('lteGradeLabel').style.color = gradeColor;
+    
+      drawLTEGauge(state.lte);
+      updateConsensusRings();
+      buildLayerBars();
+      buildEmmaBars();
+    }
+    
+    /* ════════════════════════════════════════
+       API POLLING
+       ════════════════════════════════════════ */
+    async function fetchAPI(path, options={}) {
+      try {
+        const res = await fetch(`${API}${path}`, { ...options, signal: AbortSignal.timeout(3000) });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch { return null; }
+    }
+    
+    async function pollTelemetry() {
+      const data = await fetchAPI('/lte/telemetry/dashboard');
+      if (data && data.summary) {
+        const s = data.summary;
+        if (s.emma) {
+          state.latency = s.emma.latency_ms || state.latency;
+          state.conf    = s.emma.confidence || state.conf;
+        }
+        if (s.lucy_prime) state.lte = s.lucy_prime.lte_avg || state.lte;
+        if (s.swarm)  state.agentLoad = s.swarm.agent_load || state.agentLoad;
+        if (s.fivem)  state.players   = Math.round(s.fivem.player_count || state.players);
+        if (s.safety) state.blocks    = s.safety.block_events || state.blocks;
+      }
+    }
+    
+    async function pollStatus() {
+      const data = await fetchAPI('/ame/status');
+      if (data) {
+        state.queryCount = data.query_count || 0;
+        el('headerQueries').textContent = state.queryCount;
+        const stateVal = data.state || 'nominal';
+        const pill = el('systemStatus');
+        pill.className = 'status-pill ' + (stateVal === 'nominal' ? 'online' : stateVal === 'degraded' ? 'degraded' : 'degraded');
+        pill.textContent = '● ' + stateVal.toUpperCase();
+    
+        // Update layer health from real data
+        if (data.layers) {
+          Object.entries(data.layers).forEach(([name, lh]) => {
+            const key = name.replace('_mesh','').replace('_prime','_prime');
+            if (key in state.layerHealth) {
+              state.layerHealth[key] = lh.status === 'ok' ? 95 : lh.status === 'degraded' ? 65 : 30;
+            }
+          });
+        }
+      }
+    }
+    
+    /* ════════════════════════════════════════
+       CHAT
+       ════════════════════════════════════════ */
+    async function sendChat(text) {
+      const messages = el('chatMessages');
+      // User bubble
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.innerHTML = `<div class="name">USER ●</div><div class="body">${escapeHtml(text)}</div>`;
+      messages.appendChild(userMsg);
+      messages.scrollTop = messages.scrollHeight;
+    
+      addLog('info', `Chat query: "${text.slice(0,40)}"`);
+    
+      // Try API first
+      const res = await fetchAPI('/ame/query', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ text, session_id: 'dashboard' }),
+      });
+    
+      let response;
+      if (res && res.response) {
+        response = res.response;
+        if (res.lte_score) {
+          state.lte = res.lte_score;
+          addLog('ok', `LTE score: ${Math.round(res.lte_score)} grade ${state.grade}`);
+        }
+      } else {
+        // Fallback: generate contextual response
+        response = lucyLocalResponse(text);
+      }
+    
+      const lucyMsg = document.createElement('div');
+      lucyMsg.className = 'chat-msg lucy';
+      lucyMsg.innerHTML = `<div class="name">LUCY ●</div><div class="body">${escapeHtml(response)}</div>`;
+      messages.appendChild(lucyMsg);
+      messages.scrollTop = messages.scrollHeight;
+      state.queryCount++;
+      el('headerQueries').textContent = state.queryCount;
+    }
+    
+    function lucyLocalResponse(text) {
+      const t = text.toLowerCase();
+      if (t.includes('status') || t.includes('health'))
+        return `All 137 nodes nominal. LTE: ${Math.round(state.lte)} (${state.grade}). Emma mesh confidence: ${(state.conf*100).toFixed(1)}%. Safety: CLEAR.`;
+      if (t.includes('fivem'))
+        return `FiveM bridge active. ${state.players} players online. Latency: ${Math.round(state.latency*0.8)}ms. No active incidents.`;
+      if (t.includes('swarm'))
+        return `48-agent swarm operational. Load: ${(state.agentLoad*100).toFixed(0)}%. L1-L16 analytical, L17-L28 creative, L29-L38 strategic, L39-L48 reflective.`;
+      if (t.includes('memory'))
+        return `Memory mesh active: STM (rolling 50), episodic (LTE≥60), semantic (conf≥0.75), LTM. DeltaVault chain intact.`;
+      if (t.includes('upgrade') || t.includes('learn'))
+        return `${upgradeData.filter(u=>u.status==='ACCEPTED').length} upgrades accepted this session. Lucidity gravity gate nominal. All proposals within confidence bounds.`;
+      if (t.includes('earth'))
+        return `TwinEarth running: SimA (baseline) + SimB (accelerated projection). Freshness: 0.93. Last sync: ${new Date().toLocaleTimeString()}.`;
+      if (t.includes('emma'))
+        return `Emma E1-E24 pipeline healthy. Routing confidence: ${(state.emmaPipeline.router*100).toFixed(0)}%. Consensus: ${(state.consensus_dist.strong*100).toFixed(0)}% strong.`;
+      return `Cognitive mesh processing... confidence ${(state.conf*100).toFixed(1)}%. All 8 layers responding. LTE: ${Math.round(state.lte)}/100 (${state.grade}).`;
+    }
+    
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+    }
+    
+    /* ════════════════════════════════════════
+       CLOCK
+       ════════════════════════════════════════ */
+    function updateClock() {
+      const now = new Date();
+      el('headerClock').textContent =
+        `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} UTC`;
+    }
+    
+    /* ════════════════════════════════════════
+       TOOLTIP
+       ════════════════════════════════════════ */
+    const tooltipEl = document.getElementById('tooltip');
+    function showTooltip(event, nid) {
+      tooltipEl.style.display = 'block';
+      tooltipEl.textContent = `Node: ${nid}\nStatus: Active\nLoad: ${(Math.random()*60+20).toFixed(0)}%`;
+      tooltipEl.style.left = (event.clientX + 12) + 'px';
+      tooltipEl.style.top  = (event.clientY - 10) + 'px';
+    }
+    function hideTooltip() { tooltipEl.style.display = 'none'; }
+    
+    /* ════════════════════════════════════════
+       HELPERS
+       ════════════════════════════════════════ */
+    function el(id) { return document.getElementById(id); }
+    
+    /* ════════════════════════════════════════
+       BOOT
+       ════════════════════════════════════════ */
+    window.addEventListener('load', async () => {
+      buildNodeMap();
+      resizeCanvas();
+      buildDAG();
+      initParticles();
+      drawMesh();
+      drawSpider();
+      buildSwarmHeatmap();
+      buildUpgradeFeed();
+      updateMetrics();
+    
+      // Initial logs
+      addLog('ok',   'Lucy OS v5 dashboard initialised');
+      addLog('info', '137-node cognitive mesh online');
+      addLog('ok',   'EventBus started — strict async pub/sub');
+      addLog('info', 'Emma E1-E24 pipeline ready');
+      addLog('ok',   'Bioyth0n blind executor armed');
+      addLog('info', 'DeltaVault SHA-256 chain verified');
+    
+      // Chat input handler
+      el('chatInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { const t = el('chatInput').value.trim(); if(t){sendChat(t);el('chatInput').value='';} }
+      });
+      el('chatSend').addEventListener('click', () => {
+        const t = el('chatInput').value.trim(); if(t){sendChat(t);el('chatInput').value='';}
+      });
+    
+      // Intervals
+      setInterval(updateClock,      1000);
+      setInterval(autoLog,          2200);
+      setInterval(animateNodes,     900);
+      setInterval(updateSwarmHeatmap, 2000);
+      setInterval(updateMetrics,    POLL_MS);
+      setInterval(drawSpider,       3000);
+      setInterval(pollTelemetry,    3000);
+      setInterval(pollStatus,       5000);
+    
+      // Resize handler
+      window.addEventListener('resize', () => { resizeCanvas(); buildDAG(); });
+    
+      addLog('ok', 'All dashboard systems active');
+    });
+
+    /* == NVIDIA Earth-2 TwinEarth Engine == */
+    (function(){
+      var E2={canvas:null,ctx:null,w:0,h:0,pts:[],flights:[],rot:0,simRuns:0,simInt:null,isExp:false,
+      init:function(){
+        this.canvas=document.getElementById('earth2Canvas');
+        if(!this.canvas)return;
+        this.ctx=this.canvas.getContext('2d');
+        this.resize();
+        var self=this;
+        window.addEventListener('resize',function(){self.resize()});
+        var eb=document.getElementById('e2ExpandBtn');
+        if(eb)eb.addEventListener('click',function(){self.toggleExpand()});
+        var rb=document.getElementById('e2RunBtn');
+        if(rb)rb.addEventListener('click',function(){self.runScenario()});
+        this.startAnim();
+        this.fetchData();
+        setInterval(function(){self.fetchData()},60000);
+        this.fetchFlights();
+        setInterval(function(){self.fetchFlights()},20000);
+        this.updateTerm();
+        setInterval(function(){self.updateTerm()},60000);
+      },
+      resize:function(){
+        var c=document.getElementById('earth2GlobeContainer');
+        if(!c||!this.canvas)return;
+        var w=c.offsetWidth,h=Math.max(c.offsetHeight,270);
+        this.canvas.width=w;this.canvas.height=h;this.w=w;this.h=h;
+      },
+      toggleExpand:function(){
+        this.isExp=!this.isExp;
+        var c=document.getElementById('earth2GlobeContainer');
+        var b=document.getElementById('e2ExpandBtn');
+        if(this.isExp){c.style.minHeight='500px';if(b)b.textContent='⊠';}
+        else{c.style.minHeight='270px';if(b)b.textContent='⤢';}
+        var self=this;setTimeout(function(){self.resize()},50);
+      },
+      llToXY:function(lat,lng,cx,cy,r){
+        var lr=(lng+this.rot*57.3)*Math.PI/180,la=lat*Math.PI/180;
+        return{x:cx+r*Math.cos(la)*Math.sin(lr),y:cy-r*Math.sin(la),z:Math.cos(la)*Math.cos(lr)};
+      },
+      drawGlobe:function(){
+        if(!this.ctx)return;
+        var g=this.ctx,w=this.w,h=this.h,cx=w/2,cy=h/2,r=Math.min(cx,cy)*0.82;
+        g.clearRect(0,0,w,h);
+        g.fillStyle='#020610';g.fillRect(0,0,w,h);
+        // Stars
+        g.fillStyle='rgba(255,255,255,0.6)';
+        for(var i=0;i<80;i++){g.beginPath();g.arc((i*137+43)%w,(i*251+79)%h,i%4===0?1:0.4,0,6.28);g.fill();}
+        // Atmosphere
+        var ag=g.createRadialGradient(cx,cy,r*0.9,cx,cy,r*1.15);
+        ag.addColorStop(0,'rgba(6,182,212,0.08)');ag.addColorStop(1,'rgba(0,0,0,0)');
+        g.fillStyle=ag;g.beginPath();g.arc(cx,cy,r*1.15,0,6.28);g.fill();
+        // Globe body
+        var bg=g.createRadialGradient(cx-r*.25,cy-r*.25,0,cx,cy,r);
+        bg.addColorStop(0,'#1a3a5c');bg.addColorStop(0.4,'#0e2040');bg.addColorStop(1,'#020c1b');
+        g.fillStyle=bg;g.beginPath();g.arc(cx,cy,r,0,6.28);g.fill();
+        // Grid
+        g.strokeStyle='rgba(6,182,212,0.12)';g.lineWidth=0.5;
+        for(var ln=-180;ln<180;ln+=30){g.beginPath();var f=true;for(var la=-90;la<=90;la+=4){var p=this.llToXY(la,ln,cx,cy,r);if(p.z<=0){f=true;continue;}if(f){g.moveTo(p.x,p.y);f=false;}else g.lineTo(p.x,p.y);}g.stroke();}
+        for(var la2=-60;la2<=60;la2+=30){g.beginPath();var f2=true;for(var ln2=-180;ln2<=180;ln2+=4){var p2=this.llToXY(la2,ln2,cx,cy,r);if(p2.z<=0){f2=true;continue;}if(f2){g.moveTo(p2.x,p2.y);f2=false;}else g.lineTo(p2.x,p2.y);}g.stroke();}
+        // Continents (key polygons)
+        this.drawContinents(g,cx,cy,r);
+        // Globe ring
+        g.strokeStyle='rgba(6,182,212,0.3)';g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,r,0,6.28);g.stroke();
+        // Points
+        var now=Date.now();
+        for(var i=0;i<this.pts.length;i++){
+          var pt=this.pts[i],p=this.llToXY(pt.lat,pt.lng,cx,cy,r);
+          if(p.z<=0)continue;
+          var sz=Math.max(2,(pt.mag||1)*1.5),age=(now-pt.ts)/1000,pulse=(age%3)/3;
+          g.strokeStyle=pt.color||'#f97316';g.lineWidth=1.5;g.globalAlpha=Math.max(0,1-pulse);
+          g.beginPath();g.arc(p.x,p.y,sz+pulse*12,0,6.28);g.stroke();
+          g.globalAlpha=1;g.fillStyle=pt.color||'#f97316';g.beginPath();g.arc(p.x,p.y,sz,0,6.28);g.fill();
+          if(pt.label){g.fillStyle='rgba(255,165,0,0.8)';g.font='8px Courier New';g.fillText(pt.label,p.x+sz+2,p.y+3);}
+        }
+        // Flights
+        g.strokeStyle='rgba(56,189,248,0.4)';g.lineWidth=0.8;g.setLineDash([3,4]);
+        for(var i=0;i<Math.min(this.flights.length,80);i++){
+          var f=this.flights[i],s=this.llToXY(f.lat1,f.lng1,cx,cy,r),e=this.llToXY(f.lat2,f.lng2,cx,cy,r);
+          if(s.z<=0&&e.z<=0)continue;
+          var mx=(s.x+e.x)/2,my=(s.y+e.y)/2,dx=e.x-s.x,dy=e.y-s.y,arc=Math.sqrt(dx*dx+dy*dy)*0.15;
+          g.beginPath();g.moveTo(s.x,s.y);g.quadraticCurveTo(mx-dy*0.1,my+dx*0.1-arc,e.x,e.y);g.stroke();
+        }
+        g.setLineDash([]);
+        // Night shadow
+        var hr=new Date().getUTCHours()+new Date().getUTCMinutes()/60;
+        var sunLng=-((hr/24)*360-180);
+        var ng=g.createRadialGradient(cx+r*Math.sin((sunLng+this.rot*57.3)*Math.PI/180+Math.PI),cy,r*0.2,cx,cy,r);
+        ng.addColorStop(0,'rgba(0,0,0,0)');ng.addColorStop(0.55,'rgba(0,0,0,0)');ng.addColorStop(1,'rgba(0,0,16,0.6)');
+        g.fillStyle=ng;g.beginPath();g.arc(cx,cy,r,0,6.28);g.fill();
+      },
+      drawContinents:function(g,cx,cy,r){
+        var continents=[
+          [[70,-140],[50,-125],[30,-117],[20,-90],[15,-83],[30,-80],[40,-74],[55,-60],[70,-90],[70,-140]],
+          [[10,-75],[0,-80],[-20,-70],[-35,-57],[-55,-68],[-40,-62],[-5,-35],[5,-52],[10,-75]],
+          [[71,28],[55,22],[45,15],[43,5],[50,-5],[58,3],[60,5],[57,20],[64,26],[71,28]],
+          [[35,10],[10,-18],[0,-15],[-35,18],[-35,27],[-10,38],[0,42],[20,38],[35,32],[37,25],[35,10]],
+          [[71,28],[60,73],[45,60],[25,57],[10,55],[30,90],[38,120],[40,140],[60,150],[71,140],[71,60],[71,28]],
+          [[-15,130],[-30,115],[-38,147],[-22,150],[-15,130]]
+        ];
+        g.strokeStyle='rgba(100,180,220,0.4)';g.lineWidth=0.8;
+        for(var ci=0;ci<continents.length;ci++){
+          var pts=continents[ci];g.beginPath();var f=true;
+          for(var pi=0;pi<pts.length;pi++){
+            var p=this.llToXY(pts[pi][0],pts[pi][1],cx,cy,r);
+            if(p.z<=0){f=true;continue;}
+            if(f){g.moveTo(p.x,p.y);f=false;}else g.lineTo(p.x,p.y);
+          }
+          g.stroke();
+        }
+      },
+      startAnim:function(){
+        var self=this;
+        (function anim(){self.rot+=0.003;self.drawGlobe();requestAnimationFrame(anim);})();
+      },
+      updateTerm:function(){
+        var o=document.getElementById('terminatorOverlay');
+        if(!o)return;
+        var deg=(new Date().getUTCHours()/24)*360;
+        o.style.background='linear-gradient('+deg+'deg,transparent 40%,rgba(0,0,16,0.65) 60%)';
+      },
+      addFeed:function(item){
+        var list=document.getElementById('earth2Feed');if(!list)return;
+        var sc={USGS_EARTHQUAKES:'e2-src-usgs',NOAA_SPACE:'e2-src-noaa',NASA_GIBS:'e2-src-nasa',ADSB_FLIGHTS:'e2-src-adsb',HYPER_SWARM:'e2-src-swarm'};
+        var cls=sc[item.source]||'e2-src-nasa';
+        var el=document.createElement('div');el.className='e2-feed-item';
+        el.innerHTML='<div class="e2-feed-top"><span class="e2-feed-source '+cls+'">'+item.source+'</span><span class="e2-feed-ref">'+(item.ref||'')+'</span></div><div class="e2-feed-type">'+(item.type||'')+'</div><div class="e2-feed-bottom"><span class="e2-feed-loc">'+(item.loc||'')+'</span><span class="e2-feed-val">'+(item.val||'')+'</span></div>';
+        list.insertBefore(el,list.firstChild);
+        while(list.children.length>40)list.removeChild(list.lastChild);
+        var ct=document.getElementById('e2FeedCount');if(ct)ct.textContent=list.children.length+' events';
+      },
+      fetchData:function(){
+        var self=this;
+        fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson')
+          .then(function(r){return r.json()})
+          .then(function(d){
+            var qs=(d.features||[]).slice(0,20);
+            var el=document.getElementById('e2SeismicCount');if(el)el.textContent=qs.length;
+            qs.forEach(function(f){
+              var co=f.geometry&&f.geometry.coordinates?f.geometry.coordinates:[0,0];
+              var mag=f.properties&&f.properties.mag?f.properties.mag:0;
+              if(!self.pts.find(function(p){return p.id===f.id;})){
+                self.pts.push({id:f.id,lat:co[1],lng:co[0],mag:mag,label:'M'+mag.toFixed(1),color:mag>4?'#ef4444':'#f97316',ts:Date.now()});
+                if(self.pts.length>60)self.pts.shift();
+                self.addFeed({source:'USGS_EARTHQUAKES',type:'Live Seismic Event',val:'Mag '+mag.toFixed(1),loc:(f.properties&&f.properties.place)||'Unknown',ref:'usgs.gov'});
+              }
+            });
+          }).catch(function(){});
+        fetch('https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json')
+          .then(function(r){return r.json()})
+          .then(function(d){
+            if(d&&d.length>0){
+              var spd=Math.round(d[0].proton_speed||d[0].wind_speed||450);
+              var el=document.getElementById('e2SolarWind');if(el)el.textContent=spd;
+              self.addFeed({source:'NOAA_SPACE',type:'Solar Wind Real-Time',val:spd+' km/s',loc:'DSCOVR L1',ref:'swpc.noaa.gov'});
+            }
+          }).catch(function(){});
+      },
+      fetchFlights:function(){
+        var self=this;
+        fetch('https://opensky-network.org/api/states/all?lamin=20.0&lomin=-130.0&lamax=60.0&lomax=-10.0')
+          .then(function(r){return r.ok?r.json():Promise.reject()})
+          .then(function(d){
+            if(d&&d.states){
+              self.flights=d.states.slice(0,150).filter(function(s){return s[5]!==null&&s[6]!==null;}).map(function(s){
+                var hdg=(s[10]||0)*Math.PI/180;
+                return{lat1:s[6],lng1:s[5],lat2:s[6]+Math.cos(hdg)*1.5,lng2:s[5]+Math.sin(hdg)*1.5};
+              });
+              var el=document.getElementById('e2FlightCount');if(el)el.textContent='ADS-B: '+self.flights.length+' flights';
+              var es=document.getElementById('e2FlightStat');if(es)es.textContent=self.flights.length;
+            }
+          }).catch(function(){
+            // Fallback simulation
+            self.flights=Array.from({length:60}).map(function(_,i){
+              var hubs=[[40.6,-73.8],[33.9,-118.4],[51.5,-0.4],[50.0,8.6],[35.7,140.4],[48.4,2.5]];
+              var hub=hubs[i%hubs.length];
+              var lat=hub[0]+(Math.random()-.5)*20,lng=hub[1]+(Math.random()-.5)*20;
+              var hdg=Math.random()*6.28;
+              return{lat1:lat,lng1:lng,lat2:lat+Math.cos(hdg)*1.5,lng2:lng+Math.sin(hdg)*1.5};
+            });
+            var el=document.getElementById('e2FlightCount');if(el)el.textContent='ADS-B: '+self.flights.length+' (sim)';
+            var es=document.getElementById('e2FlightStat');if(es)es.textContent=self.flights.length;
+          });
+      },
+      runScenario:function(){
+        var input=document.getElementById('e2ScenarioInput');
+        var loc=document.getElementById('e2LocationInput');
+        if(!input||!input.value.trim())return;
+        var self=this;
+        var btn=document.getElementById('e2RunBtn'),prog=document.getElementById('e2ProgressBar'),
+            fill=document.getElementById('e2ProgressFill'),pct=document.getElementById('e2ProgressPct'),
+            res=document.getElementById('e2Results'),rt=document.getElementById('e2ResultText');
+        btn.disabled=true;prog.style.display='flex';res.style.display='none';
+        var progress=0;fill.style.width='0%';
+        clearInterval(this.simInt);
+        this.simInt=setInterval(function(){
+          progress+=Math.random()*8+2;
+          if(progress>=100){
+            progress=100;clearInterval(self.simInt);fill.style.width='100%';pct.textContent='100%';
+            setTimeout(function(){
+              self.simRuns++;
+              var sr=document.getElementById('e2SimRuns');if(sr)sr.textContent=self.simRuns;
+              var lv=loc&&loc.value?loc.value:'Global';
+              var shift=(Math.random()*6+2).toFixed(1),trust=(0.94+Math.random()*.05).toFixed(2);
+              rt.innerHTML='OpenUSD geometry generated for UE5 Cesium plugin. Location: <b>'+lv+'</b>.<br>Thermal injection caused global pressure shift of +'+shift+' hPa.<br>DeltaVault ingestion completed. Trust Score: '+trust+'.<br>Pangu-Weather 15-day forecast exported.';
+              res.style.display='block';btn.disabled=false;prog.style.display='none';
+              self.addFeed({source:'NASA_GIBS',type:'Earth2Studio Sim Complete',val:'+'+shift+' hPa',loc:lv,ref:'omniverse'});
+            },400);
+          }else{fill.style.width=progress+'%';pct.textContent=Math.floor(progress)+'%';}
+        },250);
+      }};
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){E2.init();});
+      else E2.init();
+    })();
+
+  </script>
+</body>
+</html>
