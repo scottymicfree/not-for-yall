@@ -1,0 +1,41 @@
+# --- Sensitive Data & Configuration ---
+.env                # Environment variables
+config.py           # Local config (API keys, secrets)
+*.key               # Private keys
+*.pem               # Certificates
+
+# --- DataVault & Logs (IP & Audit Protection) ---
+data/               # Persistent system memory & audit logs
+logs/               # Runtime logs
+*.db                # Databases
+*.sqlite            # SQLite files
+*.log               # Generic log files
+
+# --- Proprietary Core ("Secret Sauce") ---
+private_modules/    # Any private agent or workflow modules
+core_kernel_v1_optimized/ # Optimized kernel code
+core_kernel_v2_optimized/ # Future kernel for Dyson Swarm / Hypersearm
+
+# --- OS & Editor Artifacts ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# --- IDE / Python Cache ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# --- Jupyter / Notebooks ---
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# --- Node / JS / React (if applicable) ---
+node_modules/
+dist/
+build/
+.env.local

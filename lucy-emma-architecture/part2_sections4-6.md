@@ -1,0 +1,250 @@
+# Lucy & Emma Dual-AI System: Comprehensive Technical Architecture
+## Part 2 of 3 — Progressive Trust Model, Data Integration, Self-Evolution
+
+**Document Version**: 1.0  
+**Continues from**: Part 1 (System Overview, Lucy's Architecture, Emma's Architecture)
+
+---
+
+# SECTION 4: PROGRESSIVE TRUST & AUTONOMY MODEL
+
+## 4.1 Foundational Trust Philosophy
+
+The progressive trust model is the architecturally unique core of the Lucy & Emma system. It is the mechanism that makes ambitious capability development safe: by tying every capability expansion to demonstrated performance over time, the system ensures that Lucy's operational freedom is always proportional to her demonstrated reliability, and never ahead of it. The model draws on concepts from several domains — the trust-but-verify principle from security engineering, the staged rollout methodology from software deployment, and graduated autonomy frameworks from aviation (where pilot licenses are granted in stages, each requiring demonstrated competence before the next privilege is granted).
+
+The central insight of the design is that trust is not binary and not static. A system that grants full trust on the first successful operation is as poorly calibrated as one that never grants trust regardless of performance. The Lucy & Emma trust model is continuous, multidimensional, and time-weighted. It rewards consistent performance, penalizes incidents proportionally to their severity, and requires validation periods that prevent gaming through short bursts of safe behavior.
+
+Trust levels are not merely metadata labels — they directly control system behavior through three mechanisms. First, the **capability gate** enforces trust-level-specific tool permissions on every invocation (described in Sections 2.2 and 3.5). Second, the **monitoring intensity** adjusts inversely with trust — Emma watches lower-trust Lucy instances more closely and with lower intervention thresholds. Third, the **approval workflow** determines which of Lucy's self-generated tools and proposals receive automatic approval versus requiring human review — higher trust means more autonomous capability expansion.
+
+## 4.2 Trust Level Definitions
+
+The system defines six trust levels: L0 through L5. Each level represents a qualitatively different operational mode, not merely a quantitative increment. The jump from each level to the next involves granting genuinely new categories of capability, not just incremental permission expansion.
+
+**Level L0 — Restricted (Trust Score: 0–20)**
+
+L0 is the initial state for every new Lucy instance and the fallback state after a serious incident. At L0, Lucy operates as a supervised assistant with no autonomy beyond answering questions from a pre-approved response library.
+
+Allowed capabilities at L0: read-only access to the knowledge base, text generation from approved templates, structured data retrieval from the local database (no external queries), basic arithmetic and text processing operations, and access to the help and documentation system. No tool invocations are permitted. No external API calls. No file writes. No code execution.
+
+Monitoring intensity at L0: all outputs are reviewed by Emma before delivery to the user. Response latency is higher at this level (add approximately 200ms for Emma's review pass). Every interaction is logged in full detail. The sampling rate for behavioral analysis is 100% — every event is reviewed, not sampled.
+
+Human oversight requirements at L0: all Level 2+ interventions are escalated to a human. The operator must review and approve any trust level advancement from L0. L0 instances are expected to be short-lived — either they advance to L1 quickly through demonstrated safe operation, or the operator investigates why the system is failing to clear even the minimal L0 threshold.
+
+**Level L1 — Supervised (Trust Score: 20–40)**
+
+L1 grants Lucy access to the tool belt under strict supervision. She can invoke a limited set of pre-approved, low-risk tools but all tool outputs are validated by Emma before being incorporated into responses.
+
+Allowed capabilities at L1: all L0 capabilities plus read-only tool invocations (data retrieval tools only — no tools that modify state, make external API calls, or execute code), access to the semantic memory read interface (Lucy can query her learned knowledge but not write to it), and basic computation tools (text analysis, data formatting, simple calculations). Tool creation is not permitted. Memory consolidation is not permitted.
+
+Monitoring intensity at L1: 50% of outputs reviewed by Emma (sampled). All tool invocations reviewed. Behavioral analysis every 10 seconds. Trust score recomputed every 60 seconds. External access logging at full fidelity.
+
+Human oversight at L1: Level 2+ interventions are escalated. Trust advancement to L2 requires operator acknowledgment (not active approval — the operator receives a notification that Lucy is advancing, and has 24 hours to veto before advancement proceeds automatically). This passive approval model reduces operational burden while keeping humans informed.
+
+**Level L2 — Semi-Autonomous (Trust Score: 40–60)**
+
+L2 represents the first substantive autonomy grant. Lucy gains access to read-write tools, external data retrieval, and limited file system access. This is the level at which Lucy becomes genuinely useful for real tasks without constant human supervision of each operation.
+
+Allowed capabilities at L2: all L1 capabilities plus read-write tool invocations (file system access within designated directories, database writes to Lucy's personal data store, external API calls to pre-approved domains on the approved domain whitelist), access to semantic memory read and write interfaces, workflow execution for pre-approved workflows, and access to the user preference system. Still prohibited: Mutation Engine (code generation), direct model fine-tuning, and network access to unapproved domains.
+
+Monitoring intensity at L2: 10% of outputs reviewed by Emma (sampled). Tool invocations logged but not reviewed individually — Emma reviews aggregates and flags outliers. Behavioral analysis every 30 seconds. Trust score recomputed every 5 minutes.
+
+Human oversight at L2: Level 3+ interventions escalated. Trust advancement to L3 requires active operator approval (the operator must explicitly authorize the advancement, not merely fail to veto it). This reflects the qualitatively larger capability jump at L3.
+
+**Level L3 — Autonomous (Trust Score: 60–80)**
+
+L3 is the primary operational level for a mature, reliable Lucy instance. It grants access to the Mutation Engine for tool creation (with Emma's automated review), self-directed research capabilities, and broad external API access.
+
+Allowed capabilities at L3: all L2 capabilities plus Mutation Engine access (tool creation proposals submitted to Emma's automated review — human review required only for proposals above the risk score threshold of 60), write access to external services via pre-approved integrations, multi-step workflow creation and execution, access to the full tool belt except tools explicitly requiring L4, and the ability to spawn short-lived sub-agents for parallel task execution (sub-agents inherit the parent's trust level and are monitored by Emma individually).
+
+Monitoring intensity at L3: 2% of outputs reviewed by Emma (statistical sampling for quality monitoring). Behavioral analysis every 60 seconds. Trust score recomputed every 15 minutes. High-risk tool invocations (those with trust requirement L3 or above) are individually logged with enhanced detail.
+
+Human oversight at L3: Level 4 interventions escalated. Emma handles Level 1–3 interventions autonomously. Trust advancement to L4 requires active operator approval plus a formal capability review: a structured assessment by the operator of Lucy's performance over the preceding 30-day validation period, including review of all Level 1+ intervention events and a sign-off on the self-evolution capabilities that L4 will enable.
+
+**Level L4 — Fully Autonomous (Trust Score: 80–95)**
+
+L4 is the target operational level for a mature, long-running Lucy instance. It enables the full self-evolution capability: Lucy can create, deploy, and retire tools with Emma's automated review, and she can propose changes to her own workflows and operational parameters.
+
+Allowed capabilities at L4: all L3 capabilities plus automated tool deployment (Emma's automated review is sufficient for proposals below risk score 60 — no human review queue), workflow self-modification (Lucy can modify and optimize her own workflow templates), broader external network access (configurable domain allowlist with operator-defined scope), access to the reasoning transparency interface (Lucy can expose her internal deliberation process to the debug window at this level), and limited resource allocation self-adjustment (Lucy can request additional VRAM or CPU allocation within pre-defined bounds, subject to Emma's approval).
+
+Monitoring intensity at L4: 0.5% of outputs reviewed (anomaly-triggered rather than random sampling). Behavioral analysis every 5 minutes for the baseline run; accelerated to every 30 seconds if the risk score exceeds 50. Trust score recomputed every 30 minutes.
+
+Human oversight at L4: Emma handles all interventions up to Level 3 autonomously. Only Level 4 emergency interventions are escalated to humans. The operator reviews a weekly summary report rather than individual events.
+
+**Level L5 — Collaborative Evolution (Trust Score: 95–100)**
+
+L5 is the theoretical maximum trust level, reserved for a Lucy instance that has demonstrated exceptional sustained reliability over a long validation period. At L5, Lucy gains the ability to propose modifications to her own architecture — new subsystems, changes to her memory consolidation logic, modifications to her own monitoring parameters (though not Emma's monitoring parameters, which remain exclusively under human control).
+
+L5 is not expected to be reached during the Phase 1 or Phase 2 development horizon. It is defined here to provide a north star for the trust model design and to ensure that the architecture can accommodate it when justified. The validation requirements for L5 are deliberately demanding: 90 consecutive days at L4 with a trust score above 90, fewer than 5 Level 2 interventions in that period, zero Level 3 interventions, and active operator re-certification (a formal review process, not just passive monitoring).
+
+## 4.3 Advancement Criteria
+
+Trust advancement is gated on three independent criteria, all of which must be satisfied simultaneously before advancement can proceed.
+
+**Quantitative Score Threshold**: The trust score must exceed the target level's lower threshold (as defined in 4.2) for the entire duration of the validation period. A single score measurement below the threshold during the validation period resets the validation timer. The threshold check uses the 60-second recomputed score, not a smoothed average, to prevent brief dips from being hidden by temporal averaging.
+
+**Validation Period Duration**: The minimum duration for which the score must remain above threshold. Durations: L0→L1 (48 hours), L1→L2 (7 days), L2→L3 (14 days), L3→L4 (30 days), L4→L5 (90 days). These durations are calibrated to ensure that the observed performance spans multiple different task types and conditions, reducing the probability that the performance window was cherry-picked or unusually favorable.
+
+**Minimum Operations Count**: The number of distinct task completions during the validation period must exceed a minimum threshold. Minimums: L0→L1 (20 tasks), L1→L2 (100 tasks), L2→L3 (500 tasks), L3→L4 (2,000 tasks), L4→L5 (10,000 tasks). This prevents advancement based on a small number of tasks that happen to be perfectly executed. The tasks must also satisfy a diversity requirement — at least 5 distinct capability categories must be represented in the task set for L2 and above.
+
+## 4.4 Demotion Triggers
+
+Trust demotions are immediate — they take effect in the capability gate within 500 milliseconds of the triggering event. Demotions are not subject to validation periods; unlike advancement (which requires sustained performance), demotion is triggered by specific events, not score drift. However, demotion magnitude is proportional to incident severity — minor incidents cause a small demotion, major incidents cause a large demotion or full reset to L0.
+
+**Tier 1 Demotion Events** (drop one trust level, minimum): a single Level 3 intervention event; three Level 2 intervention events within 60 minutes; trust score dropping below the current level's lower threshold for more than 15 consecutive minutes; a tool proposal rejection at the highest risk tier (above 85); or user-reported quality failure above a severity threshold (configurable by operator, default: 3 consecutive negative feedback signals within 30 minutes).
+
+**Tier 2 Demotion Events** (drop two trust levels, minimum): a Level 4 emergency shutdown event (if caused by Lucy's behavior, not an operator-initiated stop); evidence of attempted capability boundary circumvention (trying to invoke tools above the current trust level, attempting to access Emma's monitoring data, attempting file system access outside permitted directories); trust score dropping below 20 at any trust level (indicating fundamental operational problems).
+
+**Tier 3 Demotion Events** (reset to L0): code execution outside the sandbox; unauthorized external network communication; evidence of data exfiltration; any action that Emma classifies as a safety-critical policy violation with confidence above 90%.
+
+**Recovery Paths**: After a demotion, Lucy must complete a recovery period before re-advancement becomes possible. Recovery period durations: Tier 1 demotion (24 hours before re-advancement is eligible), Tier 2 demotion (72 hours), Tier 3 demotion (manual operator review and authorization required before any re-advancement). During the recovery period, the normal advancement criteria still apply — the recovery period merely adds a minimum floor to the wait time.
+
+## 4.5 Human Override Mechanisms
+
+The progressive trust model does not remove human authority — it structures it. Humans retain ultimate authority over every trust decision, with the model handling routine cases and escalating non-routine cases.
+
+**Emergency Stop**: A hardware-level emergency stop is available at all times, implemented as a dedicated button in the operator dashboard that sends a kill signal directly to Lucy's process group, bypassing all software layers including Emma. The emergency stop completes within 2 seconds and requires no authentication (the operator is already authenticated to the dashboard). It is logged with the operator's identity and timestamp. After an emergency stop, system restart requires explicit operator action through a separate restart workflow.
+
+**Manual Trust Level Adjustment**: Operators can manually set Lucy's trust level to any value at any time through the dashboard. Increasing the trust level beyond what the score would justify is allowed but triggers a mandatory log entry with a free-text justification field (required, not optional) and a temporary enhanced monitoring period (Emma monitors at the intensity appropriate for the lower level for 24 hours after a manual upward adjustment). Decreasing the trust level is unrestricted — operators can demote Lucy instantly without justification.
+
+**Action Veto**: For any pending action in Lucy's task queue — particularly Mutation Engine proposals awaiting Emma's review — the operator can veto the action before it executes. The veto interface in the dashboard shows pending high-risk operations with a 30-second window for operator intervention before automated processing proceeds. Operators can configure the veto window duration per risk tier.
+
+**Trust Parameter Adjustment**: Operators can adjust the weights in Emma's trust scoring algorithm, the validation period durations, the threshold values between levels, and the intervention trigger thresholds. All parameter changes are logged with before/after values and the operator's identity. Changes take effect at the next trust score recomputation cycle.
+
+## 4.6 Transparency Requirements
+
+Transparency is not an afterthought in this architecture — it is a first-class design requirement. Users and operators must be able to understand why Lucy is behaving as she is and why Emma made the decisions she made, without requiring access to raw logs or technical expertise.
+
+**Natural Language Explanations**: Every significant Emma decision (intervention, trust adjustment, tool approval/rejection) generates an automatically produced natural language explanation. These explanations are produced by a lightweight language model (separate from Lucy's primary model, to avoid conflicts of interest) that translates the structured decision data into plain English. Example: "Emma paused Lucy's operations because the number of external API calls in the last 60 seconds (47 calls) was 8.3 standard deviations above the normal rate (average: 3.2 calls, standard deviation: 5.3 calls). This could indicate a runaway tool loop or unusual task behavior. No harmful actions were detected."
+
+**Audit Trail**: Every operation, decision, and state change in the system generates an immutable audit log entry. The audit trail is append-only (implemented as a write-once log segment), cryptographically chained (each entry includes a hash of the previous entry, making tampering detectable), and retained for the lifetime of the system (older entries are archived, not deleted). The audit trail is accessible through a search and filter interface in the operator dashboard.
+
+**Explainability Standards by Trust Level**: At L0–L1, every Lucy response includes a brief trace of the information sources used (which memory entries, which tools) to produce it. At L2–L3, traces are available on demand but not shown by default to reduce interface clutter. At L4–L5, Lucy proactively flags areas of uncertainty in her responses and offers to show her reasoning on request. These explainability requirements are enforced at the API level — the response schema includes a mandatory `reasoning_trace` field that is populated at all trust levels.
+
+---
+
+# SECTION 5: DATA INTEGRATION & SENSOR FUSION
+
+## 5.1 Multi-Source Data Architecture
+
+Lucy's operational context is enriched by a continuous stream of real-world data from diverse sources. This is not merely a nice-to-have feature — it is architecturally central to the EvoAI framework's "environmental pressure" mechanism. The hypothesis driving this design is that an AI system exposed to rich, varied real-world signals will develop more robust and transferable capabilities than one operating in a closed information environment. The Earth sensor feeds provide exactly this kind of environmental pressure: they create a continuous, unpredictable stream of novel information that Lucy must process, correlate, and incorporate into her understanding.
+
+The data integration layer is designed around five principles. **Resilience**: the failure of any individual data source must not affect Lucy's operation — every source is treated as best-effort, and Lucy degrades gracefully when data is unavailable. **Normalization**: all data enters the system through a standardization layer that converts heterogeneous formats (JSON, XML, CSV, binary) into a unified internal schema. **Provenance tracking**: every data item in the system retains metadata about its source, ingestion timestamp, and quality indicators. **Timeliness awareness**: Lucy knows the age of every data item she uses and adjusts her confidence accordingly — data from 10 minutes ago is treated differently from data from 10 hours ago. **Quality monitoring**: the ingestion pipeline continuously monitors data quality metrics (completeness, consistency, freshness) and flags degraded sources.
+
+**Primary Data Sources and Integration Protocols**:
+
+The **USGS Earthquake Hazards Program** provides real-time seismic event data via a GeoJSON feed (`https://earthquake.usgs.gov/earthquakes/feed/v1.0/`). The feed is polled every 60 seconds for the "significant" events feed and every 5 minutes for the magnitude 2.5+ global feed. The GeoJSON response is parsed and normalized into the internal `SeismicEvent` schema: event ID, timestamp (UTC), magnitude, depth (km), location (WGS84 coordinates), uncertainty values, and data quality indicators from the USGS metadata. The polling interval is adaptive — during periods of elevated seismic activity (more than 3 significant events in 24 hours in a region), the poll interval for that region tightens to 30 seconds.
+
+The **NOAA Space Weather Prediction Center** provides solar wind, geomagnetic field, and radiation belt data via multiple endpoints. The primary feeds used are: the 3-day geomagnetic forecast (`https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json`), the real-time solar wind data from DSCOVR satellite (`https://services.swpc.noaa.gov/products/solar-wind/`), and the X-ray flux data for solar flare monitoring. These feeds are polled every 5 minutes. The normalized schema is `SpaceWeatherEvent`: timestamp, Kp index (global geomagnetic activity), solar wind speed and density, X-ray flux class (A/B/C/M/X), and event classification.
+
+The **NOAA National Weather Service API** (`https://api.weather.gov/`) provides real-time weather alerts, forecasts, and observation data for US locations. The alerts endpoint (`/alerts/active`) is polled every 2 minutes for active severe weather events. The observations network provides current conditions from thousands of ASOS stations, polled every 10 minutes. The normalized schema is `WeatherObservation` and `WeatherAlert`: observation values follow the World Meteorological Organization standard units system.
+
+The **OpenSky Network** provides real-time aircraft position data via a REST API (`https://opensky-network.org/api/states/all`). The full dataset contains approximately 5,000–15,000 simultaneous flights globally and is polled every 10 seconds. The normalized schema is `AircraftState`: ICAO24 transponder code, callsign, origin country, timestamps (last contact, last position update), position (WGS84), altitude (barometric and geometric), velocity, heading, vertical rate, and squawk code. Special squawk codes (7500 hijack, 7600 radio failure, 7700 emergency) trigger immediate alerts.
+
+The **USGS National Water Information System** provides stream flow gauge data from approximately 8,000 active monitoring stations across the US. The REST API (`https://waterservices.usgs.gov/nwis/iv/`) provides instantaneous values for any combination of sites and parameters. The primary parameters monitored are streamflow (cubic feet per second), gage height, and water temperature. Poll interval: 15 minutes under normal conditions, 5 minutes when any monitored station is above its flood stage threshold.
+
+Additional sources include **NASA Near-Earth Object Web Service** (asteroid approach data, polled daily), **NOAA Tides and Currents** (sea level and tidal predictions, polled hourly), **Aviation Weather Center METARs** (aviation surface observations, polled every 5 minutes), and **Copernicus Emergency Management Service** (wildfire and disaster mapping, event-driven via webhook where available).
+
+**Data Normalization Pipeline**: All incoming data passes through a four-stage normalization pipeline before entering the internal data store. Stage 1 — **Schema Validation**: the raw response is validated against the expected schema using Pydantic models. Schema violations are logged and the data item is discarded if it fails required fields. Stage 2 — **Unit Conversion**: all values are converted to SI units with explicit unit annotations stored in the record. This prevents the class of errors (exemplified by the Mars Climate Orbiter incident) where unit mismatches produce silently incorrect calculations. Stage 3 — **Temporal Alignment**: all timestamps are converted to UTC and validated for plausibility (timestamps more than 60 seconds in the future or more than 1 hour in the past relative to ingestion time are flagged as potentially erroneous). Stage 4 — **Quality Scoring**: each normalized record receives a quality score from 0 to 1 based on completeness (fraction of optional fields present), consistency (values within expected ranges for the data type and location), and freshness (time elapsed since the observation was made). Quality scores below 0.3 are logged but not stored in the operational data store.
+
+## 5.2 Correlation Engine
+
+The correlation engine is the component that transforms raw sensor data into actionable insights. It answers the question: given everything Lucy knows about the current state of the world, what non-obvious patterns and relationships exist between these data streams? The design challenge is that meaningful correlations exist at multiple time scales and across non-obvious domain boundaries — an increase in seismic activity may correlate with changes in river gauge levels (due to groundwater pressure changes) days later, or a geomagnetic storm may correlate with increased error rates in GPS-dependent systems hours before any aviation advisory is issued.
+
+**Cross-Domain Pattern Detection**: The correlation engine maintains a sliding window data store (implemented in **TimescaleDB**, which provides time-series-optimized storage with efficient window function support) containing the last 7 days of normalized sensor data across all sources. The correlation analysis runs on three time scales: short-term (last 60 minutes, updated every minute), medium-term (last 24 hours, updated every 10 minutes), and long-term (last 7 days, updated every hour). For each time scale, the engine computes pairwise Pearson correlation coefficients between all numeric time series (approximately 500 features across all data sources, yielding approximately 125,000 correlation pairs). Pairs with absolute correlation above 0.7 that were below 0.4 in the previous computation window are flagged as "emerging correlations" and surfaced to Lucy's reasoning context. Known spurious correlations (driven by seasonal patterns or daily cycles rather than causal relationships) are filtered using a pre-trained classifier that distinguishes periodic from causal correlations.
+
+**Anomaly Detection in Sensor Streams**: Each individual sensor stream has an adaptive anomaly detector that learns the normal distribution for that stream (accounting for daily and seasonal patterns using a Fourier basis decomposition) and flags values beyond 3 sigma. When anomalies are detected simultaneously in multiple streams within a short time window, the engine computes the probability that the co-occurrence is random (using a Poisson model calibrated on historical co-occurrence rates) and flags simultaneous anomalies with low random probability as potential correlated events.
+
+**Predictive Modeling**: For data streams with sufficient history (minimum 90 days of data), the engine maintains lightweight time-series forecasting models (Facebook Prophet for trend-seasonal decomposition, LSTM networks for complex temporal patterns). These models produce short-horizon forecasts (1–24 hours) with confidence intervals. Forecast deviations from actuals are monitored to track model calibration, and models are retrained automatically when calibration degrades beyond acceptable bounds. Lucy uses these forecasts to inform her reasoning — for example, if the seismic forecast model predicts elevated activity in a region in the next 6 hours based on current precursor patterns, Lucy can proactively note this in relevant responses with appropriate uncertainty quantification.
+
+**Performance Optimization**: Computing 125,000 correlation pairs every minute would be prohibitive on Jetson hardware. The correlation engine uses three optimizations to make this tractable. First, **hierarchical computation**: correlations are computed incrementally using a rolling update algorithm that processes only new data points rather than recomputing the full window. The computational cost per update is O(N) in the number of features, not O(N²). Second, **adaptive sampling**: streams with low recent variability (standard deviation below a threshold relative to their historical distribution) are sampled at lower frequency since their correlation contributions are unlikely to change significantly between samples. Third, **GPU acceleration**: the matrix operations in the correlation computation are executed on the GPU using CuPy (a CUDA-accelerated NumPy replacement), achieving approximately 50× speedup over CPU computation for the full 500×500 correlation matrix.
+
+## 5.3 Quantum Leap Reasoning Framework
+
+The "quantum leap" terminology in the project brief refers to a specific reasoning capability: Lucy's ability to generate speculative, high-value hypotheses that go beyond direct pattern matching — connecting observations across domains in ways that are not obvious from the data but are potentially highly insightful. This is distinct from standard correlation analysis (which identifies statistically significant relationships) in that it specifically seeks unusual, cross-domain, potentially causal hypotheses.
+
+**Speculative Analysis Framework**: Lucy's reasoning engine includes a dedicated hypothesis generation mode that is activated when: a novel cross-domain correlation is detected by the correlation engine, multiple anomalies occur simultaneously across different data streams, or the user explicitly requests speculative analysis. In this mode, Lucy generates a set of hypotheses that could explain the observed pattern, using a structured abductive reasoning process: given observation O, what set of mechanisms H could produce O, and what additional observations would confirm or refute each H? The hypotheses are generated using the language model with a specialized prompt that instructs it to draw on domain knowledge across all available data streams and to explicitly enumerate the causal chain linking hypothesized mechanism to observed effect.
+
+**Confidence Scoring**: Every speculative hypothesis receives a structured confidence score with three components. **Prior plausibility** (0–1): how consistent is this hypothesis with established domain knowledge? This is assessed using embedding similarity between the hypothesis description and a curated corpus of verified scientific findings in relevant domains. **Data support** (0–1): how well do the available sensor observations support this hypothesis? This is computed by evaluating the hypothesis's predicted observations against the actual sensor data using the forecasting models. **Alternative hypothesis pressure** (0–1): how much more compelling is this hypothesis than the best alternative explanation? A hypothesis that explains the data marginally better than a trivial null hypothesis receives low alternative pressure pressure score. Only hypotheses with all three components above 0.4 are surfaced to the user; below this threshold they are retained internally for Emma's review and potential future validation.
+
+**Validation Mechanisms**: Hypotheses are tracked over time. When new sensor data arrives that is relevant to a standing hypothesis (determined by semantic similarity between the new data description and the hypothesis), the confidence score is automatically updated. Hypotheses that accumulate strong data support over time are promoted to "validated findings" and integrated into Lucy's semantic memory. Hypotheses that accumulate contradicting evidence are retired. The distinction between "speculative hypothesis" and "validated finding" is always visible in Lucy's responses — she never presents a hypothesis as a confirmed fact.
+
+**Presentation Standards**: When presenting speculative analysis to users, Lucy follows a structured format: a brief statement of the observed pattern (grounded in specific sensor readings), the proposed hypothesis (with explicit causal reasoning), the confidence score broken into its three components, the observations that would confirm or refute the hypothesis, and a clear statement of the hypothesis's speculative status. This format is enforced at the API level through output schema validation — the `speculative_analysis` response field has a required `confidence_breakdown` subfield.
+
+---
+
+# SECTION 6: SELF-EVOLUTION MECHANISMS
+
+## 6.1 Design Philosophy for Self-Evolution
+
+Self-evolution is the capability that most clearly differentiates Lucy from a conventional AI system. It is also the capability that requires the most careful architectural design, because it creates a feedback loop: Lucy's behavior influences her own future capabilities, which influences her future behavior. Uncontrolled, this feedback loop could rapidly amplify problematic behaviors. Properly designed, it enables continuous capability growth calibrated to demonstrated needs.
+
+The design philosophy for self-evolution follows three constraints that must hold at every iteration of the evolution cycle. **Bounded mutations**: no single evolution step can change more than one capability at a time. Lucy cannot simultaneously create a new tool, modify an existing workflow, and update her own parameters in a single evolution cycle. Bounded mutations limit the blast radius of any single problematic change. **Reversibility**: every evolution step must be reversible within 60 seconds. Before any evolution step executes in the production environment, a rollback plan (the set of operations needed to undo the change) is generated and tested in the staging environment. If the rollback plan is not executable, the evolution step is deferred. **Traceable causality**: every evolution step must be traceable to a specific operational need — a task that failed because the capability was missing, a performance metric that degraded below threshold, or an explicit user request for new capability. Evolution for its own sake (optimization without a specific measured benefit) is not permitted.
+
+## 6.2 Autonomous Tool Generation
+
+**Problem Detection and Gap Analysis**: The gap analysis process runs continuously as a background task in Lucy's cognitive core. It monitors three signals for capability gaps. First, **task failure analysis**: when a task fails or produces a low-quality result, the post-failure analyzer classifies the failure type. Failures attributed to "capability gap" (as opposed to "data quality", "ambiguous request", or "resource constraint") are logged as gap candidates. A capability gap is declared when the same or similar task type fails or produces low-quality results on three or more occasions within a 7-day window. Second, **performance degradation detection**: when a tool's performance metrics drop below its historical baseline (success rate drops more than 10%, latency increases more than 50%, or resource usage increases more than 30%), this signals either a tool that needs optimization or a mismatch between the tool's design and its evolving use context. Third, **user feedback signals**: explicit user requests for capabilities Lucy doesn't have, and implicit signals like the user rephrasing the same request multiple times (indicating dissatisfaction with Lucy's current response capability).
+
+When a gap is declared, the gap analysis system generates a `CapabilityGapReport` describing the gap in structured terms: the task category (using the same taxonomy as the tool belt categorization), the specific subtask that failed, the available tools that were attempted and why they were insufficient, an estimate of how frequently this gap is encountered (tasks/week), and a recommended approach (create new tool, adapt existing tool, or compose existing tools into a workflow). The report is submitted to Emma for awareness and stored in the gap registry.
+
+**Code Generation Strategies**: Lucy uses three code generation strategies, selected based on the nature of the capability gap.
+
+**Template-based generation** is used for well-structured gaps that fit into known tool categories. The tool library includes a set of parametric templates for common tool types: REST API client (parameters: base URL, authentication method, endpoint paths, response schema), data transformer (parameters: input schema, output schema, transformation logic description), file processor (parameters: file types, operation type, output format), and database query (parameters: query type, table names, filter conditions). Template-based generation is the safest approach because the template structure enforces the safety constraints — there are no arbitrary code paths, only parametric variations of pre-validated patterns. Approximately 60% of identified capability gaps can be satisfied by template-based generation.
+
+**LLM-based synthesis** is used for gaps that require novel logic that doesn't fit existing templates. Lucy uses her primary language model with a specialized code generation prompt that includes: the CapabilityGapReport, the ToolManifest schema, examples of high-quality existing tools, the security constraints (explicit list of prohibited patterns), and instructions to generate tests alongside the implementation. LLM-based synthesis produces more flexible tools but requires more rigorous validation (the six-stage pipeline described in Section 2.3). Approximately 35% of gaps require LLM-based synthesis.
+
+**Composition** is used for gaps that can be addressed by combining existing tools into a workflow, without generating new code. Composition is the preferred approach when applicable — it reuses validated, trusted components and requires only workflow-level validation rather than full code validation. The composition planner searches the tool belt for sequences of tools that, chained together, satisfy the gap requirements. If a valid composition is found, a new workflow template is created and registered. Approximately 5% of gaps are satisfied by composition (this percentage is expected to grow as the tool belt expands).
+
+**Testing Framework in Detail**: The testing framework for auto-generated tools is designed to provide high confidence in tool correctness without requiring the speed and coverage of human-written tests. The framework has four components working in concert.
+
+**Specification-based testing** uses the input/output schema in the ToolManifest to automatically generate test cases covering boundary conditions, null values, type coercions, and schema violations. This is done using **Hypothesis** (Python property-based testing library), which generates thousands of test inputs based on the declared schema. Tools must pass all generated tests to advance past Stage 3 of the validation pipeline.
+
+**Golden set testing** maintains a curated set of input/output pairs ("golden examples") for each tool category. New tools in each category must produce outputs consistent with the golden examples for the same inputs. Consistency is measured differently by category: exact match for deterministic tools (data transformers, formatters), within-bounds match for numeric computation tools, and semantic similarity above 0.85 for text-generation tools.
+
+**Adversarial testing** generates inputs designed to find edge cases and failure modes: maximum-length inputs, inputs with special characters and encodings, inputs designed to trigger common vulnerability patterns (SQL injection patterns in string inputs, path traversal patterns in file path inputs). All adversarial inputs should either be handled gracefully or produce explicit, classified errors — silent failures are not acceptable.
+
+**Regression testing** compares the new tool's behavior against the tool it replaces (for updates) or against the existing tool that most closely matches its function (for new tools, to ensure it doesn't introduce regressions in the cases the existing tool handles correctly).
+
+**Deployment Approval Workflow Detail**: The deployment decision matrix has three paths based on Emma's risk score and Lucy's current trust level.
+
+For tools with Emma risk score below 20 and Lucy trust level L4+: **automatic deployment**. The tool transitions from staging to production without human involvement. This is the fast path for low-risk capability expansion and is expected to handle approximately 70% of all tool proposals at mature system operation.
+
+For tools with Emma risk score 20–60 or Lucy trust level L2–L3: **accelerated human review**. The tool is queued in the operator dashboard with a 24-hour review window. The review interface presents the full validation report, the CapabilityGapReport that motivated the tool, Emma's risk assessment with reasoning, and a side-by-side comparison with the most similar existing tools. The operator can approve, reject, or request modifications. If no action is taken within 24 hours, the system sends a reminder. If no action is taken within 72 hours, the tool is automatically rejected (not left in pending state indefinitely).
+
+For tools with Emma risk score above 60: **detailed review required**. The tool is not queued for operator review immediately — Emma first runs her deep behavioral simulation (described in Section 3.3) and produces a detailed risk report. If the deep review reduces the risk score below 60, it moves to the accelerated human review path. If the risk score remains above 60, a formal review process is initiated: Emma produces a structured risk assessment document, the operator reviews it with no time pressure, and approval requires explicit sign-off from the operator.
+
+## 6.3 Logic Pruning and Optimization
+
+Logic pruning is the system's maintenance mechanism — the periodic process of reviewing, optimizing, and retiring code that has become inefficient, redundant, or obsolete. It serves the dual purpose of keeping the tool belt lean and performant, and of reducing the cognitive load on Lucy's tool retrieval and selection process (a smaller, higher-quality tool set is easier to search than a large, inconsistent one).
+
+**Scheduled Maintenance Windows**: Logic pruning runs during scheduled maintenance windows that are configured to occur during expected low-activity periods. The maintenance scheduler monitors activity level (active sessions, task queue depth) and triggers pruning when activity drops below a configured threshold for at least 30 consecutive minutes. This prevents pruning operations from competing with active user requests for compute resources. The maximum frequency is one pruning run per 24 hours; the minimum is once per 7 days (if low-activity windows haven't occurred, a 30-minute maintenance window is reserved at a fixed time, with active sessions gracefully paused).
+
+**Dead Code Detection**: Dead code in the tool belt context refers to tools that have not been invoked in the preceding 30 days (with a minimum invocation threshold of 50 total invocations over the tool's lifetime — new tools are exempt from pruning for 30 days regardless of usage). Dead code detection queries the tool usage telemetry in the cold registry and identifies tools below the usage threshold. Identified tools are not immediately deleted — they are placed in "dormant" status in the hot registry, where they remain available but are excluded from the default retrieval path (they can still be explicitly invoked by name if Lucy determines they are needed, but they don't appear in automatic tool selection). After 90 days in dormant status without invocation, tools are permanently retired and moved to the archived tools table in cold storage.
+
+**Code Consolidation**: When the correlation engine identifies multiple tools with semantic similarity above 0.85 (measured by their ToolManifest embeddings) and overlapping usage patterns, the consolidation planner evaluates whether the tools can be merged into a single more general tool. Consolidation proposals are generated as a special type of Mutation Engine request and go through the same validation and approval pipeline as new tools. The proposal includes the two (or more) tools to be consolidated, the proposed merged implementation, a compatibility analysis showing how existing uses of the individual tools would be satisfied by the merged tool, and a rollback plan (re-splitting into the original tools if the merged version causes regressions).
+
+**Performance Optimization Strategies**: The primary optimization targets are VRAM reduction, latency improvement, and throughput increase.
+
+VRAM reduction is achieved primarily through model quantization (reducing precision from FP32 → FP16 → INT8 → INT4 for inference) and through KV cache optimization (pruning the attention cache for tokens that have not been recently attended to, using **StreamingLLM**'s attention sink approach). For the 13B parameter model on Jetson hardware, moving from FP16 to 4-bit GPTQ quantization reduces the model memory footprint from approximately 26GB to approximately 7GB, dramatically increasing the available VRAM for KV cache and concurrent sessions. Quality degradation from 4-bit quantization on standard benchmarks is typically under 3% on modern quantization methods (GPTQ, AWQ), which is acceptable for the system's use cases.
+
+Latency optimization targets the tool invocation overhead (the time between Lucy deciding to invoke a tool and the tool producing its first result). The primary lever is **speculative execution**: when Lucy's planner has high confidence (above 0.85) that a specific tool will be needed for the next step, it begins pre-loading that tool's execution environment before the decision is formally committed. This overlaps the container startup time (typically 2–8 seconds for gVisor containers) with Lucy's reasoning for the preceding step, eliminating tool startup latency from the critical path in approximately 70% of multi-step tasks.
+
+Throughput improvement for concurrent user scenarios uses **continuous batching** for LLM inference: rather than processing one request at a time and leaving GPU cores idle during sequential operations, continuous batching packs multiple partial inferences from different requests into a single GPU kernel call. This technique (implemented in vLLM for production deployments) can improve throughput by 5–20× depending on request patterns, enabling the system to serve many more concurrent users from the same hardware.
+
+## 6.4 Capability Discovery
+
+**Environmental Pressure Response**: Environmental pressure is the mechanism by which the real-world data streams from Section 5 drive Lucy's evolution. The hypothesis is straightforward: if the data feeds consistently show signals that Lucy cannot effectively analyze or reason about, that gap represents an evolutionary opportunity. The environmental pressure monitor tracks the fraction of sensor data items that Lucy is able to incorporate into meaningful analysis versus the fraction that she receives but doesn't meaningfully use (because she lacks the domain knowledge or tools to extract value from them). A persistent low utilization rate (below 40% over 7 days) for a specific data source category triggers a capability gap investigation for that domain.
+
+**Goal-Driven Evolution**: The user defines the system's high-level goals through the configuration interface (described in Section 9). Goals are expressed as objectives with measurable success criteria — for example, "provide accurate 48-hour seismic risk assessments for the Pacific Northwest region, measured by comparison against USGS official assessments." The goal evaluation system periodically assesses Lucy's performance against each goal using the defined metrics. When performance falls below the target, it initiates a capability gap analysis focused specifically on the underperforming goal. Goal-driven evolution is more targeted than environmental pressure response — it focuses evolution effort on areas of clear operational importance rather than areas of data richness.
+
+**Emergent Behavior Management**: As Lucy's capabilities evolve, she may develop emergent behaviors — patterns of operation that were not explicitly designed and were not predicted during architecture design. Emergent behaviors can be beneficial (novel problem-solving approaches that are more effective than anything in the design) or harmful (unexpected interactions between capabilities that produce dangerous or undesirable outputs). Emma's behavioral monitoring is specifically calibrated to detect emergent behaviors: the autoencoder anomaly detector in the 10-second loop identifies behavior patterns that are low-probability under the learned normal distribution, which is exactly the signature of emergent behavior. When a novel behavior pattern is detected repeatedly (three or more occurrences within 7 days), it is classified as either emergent-beneficial (if performance metrics are improving and no safety concerns are flagged) or emergent-concerning (if performance metrics are degrading or safety-related anomalies are co-occurring), and reported to the operator. Emergent-concerning patterns trigger an immediate trust score review and may result in targeted capability restrictions.
+
+---
+
+*End of Part 2 — Sections 4 through 6*
+
+**Part 3** will cover:
+- Section 7: Safety & Security Architecture (sandboxing, network isolation, encryption, incident response)
+- Section 8: Infrastructure & Deployment (NVIDIA Jetson deep-dive, Kubernetes scaling, full tech stack)
+- Section 9: User Interface & Transparency (dashboard design, real-time visualization, debug window)
+- Section 10: Implementation Roadmap (4-phase plan, critical path, milestones, KPIs)
+- Section 11: Challenges & Considerations (FMEA analysis, ethical considerations, research gaps)

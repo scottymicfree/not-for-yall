@@ -1,0 +1,74 @@
+{
+  "status": "idle",
+  "runtimeMode": "observe",
+  "startedAt": "2026-04-21T21:09:58.314Z",
+  "promptLoaded": true,
+  "explanation": "This fresh Lucy UI is a local shell for writing the big master build prompt and then running a checkpoint-based learning rewrite loop. Lucy is human-first and Earth-first. Emma watches by default, scores outcomes, and only blocks on unsafe results or protected-boundary violations. The loop writes versioned rewrite artifacts into the workspace when Emma approves.",
+  "emma": {
+    "doctrine": "watcher-first",
+    "lastDecision": null,
+    "trustScore": 0.82,
+    "rewardScore": 0.74,
+    "notes": [
+      "Emma watches outcomes and approves safe rewrites."
+    ]
+  },
+  "loop": {
+    "active": false,
+    "totalLoops": 8,
+    "currentLoop": 0,
+    "checkpointSeconds": 8,
+    "autoRewrite": true,
+    "nextFocus": "earth-baseline",
+    "stopReason": null,
+    "intervalId": null,
+    "lastCheckpointAt": null,
+    "lastRewritePath": null
+  },
+  "history": [],
+  "latestRewrite": null,
+  "bridgeRegistry": [
+    {
+      "id": "earth",
+      "purpose": "Earth baseline and Planetary Pulse input",
+      "status": "ready"
+    },
+    {
+      "id": "quantum",
+      "purpose": "Multi-candidate reasoning at checkpoints",
+      "status": "ready"
+    },
+    {
+      "id": "ingestion",
+      "purpose": "Feed discovery and adapter rewrites",
+      "status": "ready"
+    },
+    {
+      "id": "eyes",
+      "purpose": "Debug and observation scripts",
+      "status": "ready"
+    },
+    {
+      "id": "ears",
+      "purpose": "Input and listening scripts",
+      "status": "ready"
+    },
+    {
+      "id": "hands",
+      "purpose": "Action and write scripts",
+      "status": "ready"
+    }
+  ],
+  "earth": {
+    "mode": "baseline",
+    "pulseState": "stable",
+    "harmonyScore": 0.72,
+    "sourceConfidence": 0.81,
+    "mappedSignals": {
+      "co2": "pitch",
+      "oceanTemperature": "bass",
+      "biodiversity": "active instruments",
+      "ecosystemStress": "distortion"
+    }
+  }
+}

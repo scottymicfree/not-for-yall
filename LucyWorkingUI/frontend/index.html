@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lucy Working UI</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <h1>Lucy Working UI</h1>
+      <p>Fresh local shell with a real prompt editor, Emma watcher panel, Earth-first logic, and a checkpoint-based learning rewrite loop.</p>
+    </div>
+    <div class="badges">
+      <span id="statusBadge" class="badge">Status: idle</span>
+      <span id="modeBadge" class="badge">Mode: observe</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card span-2">
+      <div class="card-header">
+        <h2>Master Build Prompt</h2>
+        <div class="row gap">
+          <button id="loadTemplateBtn">Load Master Build</button>
+          <button id="savePromptBtn">Save Prompt</button>
+        </div>
+      </div>
+      <textarea id="promptInput" class="prompt"></textarea>
+      <div class="row split top-gap">
+        <div><strong>Prompt Status:</strong> <span id="promptStatus">Saved</span></div>
+        <div><strong>Chars:</strong> <span id="promptChars">0</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Build + Learning Rewrite Loop</h2>
+      <label>Total loops <input id="totalLoops" type="number" min="1" max="100" value="8" /></label>
+      <label>Checkpoint seconds <input id="checkpointSeconds" type="number" min="1" max="3600" value="8" /></label>
+      <label class="checkbox"><input id="autoRewrite" type="checkbox" checked /> Auto rewrite when Emma approves</label>
+      <div class="row wrap gap top-gap">
+        <button id="startLoopBtn">Start Learning Loop</button>
+        <button id="checkpointBtn">Run Single Checkpoint</button>
+        <button id="stopLoopBtn">Stop Loop</button>
+      </div>
+      <pre id="loopBox" class="box small"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Emma Watcher</h2>
+      <pre id="emmaBox" class="box small"></pre>
+    </section>
+
+    <section class="card span-2">
+      <h2>Explain the Build</h2>
+      <pre id="explainBox" class="box"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Planetary Pulse</h2>
+      <pre id="earthBox" class="box small"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Bridge Registry</h2>
+      <pre id="bridgeBox" class="box small"></pre>
+    </section>
+
+    <section class="card span-2">
+      <h2>Rewrite History</h2>
+      <pre id="historyBox" class="box"></pre>
+    </section>
+
+    <section class="card span-2">
+      <h2>DeltaVault</h2>
+      <pre id="ledgerBox" class="box tall"></pre>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
