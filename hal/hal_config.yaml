@@ -1,0 +1,249 @@
+# ============================================================
+# SOVEREIGN v2.1 — Lucy HAL Board Configuration
+# ============================================================
+# All addresses, bus IDs, and resource paths are defaults
+# for the reference board. Override per physical unit via
+# environment variable: LUCY_HAL_CONFIG=/path/to/config.yaml
+# ============================================================
+
+board:
+  name: "Sovereign v2.1"
+  revision: "RC1"
+  form_factor: "SSI-EEB / 2U Rackmount"
+  serial: "SVR-V21-000001"
+
+# ── Host Subsystem ─────────────────────────────────────────
+host:
+  cpu_model: "AMD EPYC 9004 (Genoa)"
+  ram_gb: 512
+  ram_type: "DDR5-4800 ECC RDIMM"
+  ram_channels: 8
+  pcie_lanes: 128
+  pcie_gen: 5
+  cpu_temp_sensor: "/sys/class/thermal/thermal_zone0/temp"
+  cpu_freq_scaling: "/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+
+# ── NeuroMesh — GPU Accelerator Zones ──────────────────────
+neuromesh:
+  total_nodes: 137          # 1 Prime + 8 Clusters + 128 Workers
+  gpus:
+    - id: 0
+      model: "NVIDIA L40S"
+      pcie_bus: "0000:03:00.0"
+      zone: "ACCEL_ZONE_A"
+      mig_profiles:
+        - "1g.12gb"          # Worker slices
+        - "2g.24gb"          # Cluster slices
+        - "4g.48gb"          # Prime slice
+      vram_gb: 48
+      tdp_w: 350
+      cooling: "D2C_liquid"
+    - id: 1
+      model: "NVIDIA L40S"
+      pcie_bus: "0000:04:00.0"
+      zone: "ACCEL_ZONE_A"
+      mig_profiles:
+        - "1g.12gb"
+        - "2g.24gb"
+      vram_gb: 48
+      tdp_w: 350
+      cooling: "D2C_liquid"
+    - id: 2
+      model: "NVIDIA L40S"
+      pcie_bus: "0000:41:00.0"
+      zone: "ACCEL_ZONE_B"
+      mig_profiles:
+        - "1g.12gb"
+        - "2g.24gb"
+      vram_gb: 48
+      tdp_w: 350
+      cooling: "D2C_liquid"
+    - id: 3
+      model: "NVIDIA L40S"
+      pcie_bus: "0000:42:00.0"
+      zone: "ACCEL_ZONE_B"
+      mig_profiles:
+        - "1g.12gb"
+        - "2g.24gb"
+      vram_gb: 48
+      tdp_w: 350
+      cooling: "D2C_liquid"
+  # MIG node layout: how 137 logical nodes map to MIG instances
+  node_layout:
+    prime:
+      gpu_id: 0
+      mig_instance: "4g.48gb"
+      model: "mistral-7b"
+      memory_gb: 48
+    clusters:                # 8 cluster nodes, C1-C8
+      gpu_ids: [0, 1, 2, 3]  # 2 per GPU
+      mig_instance: "2g.24gb"
+      model: "phi3:mini"
+      memory_gb: 24
+    workers:                 # 128 worker nodes, W001-W128
+      gpu_ids: [0, 1, 2, 3]  # 32 per GPU
+      mig_instance: "1g.12gb"
+      model: "tinyllama"
+      memory_gb: 12
+  nvidia_mps_pipe: "/tmp/nvidia-mps"
+  nvidia_smi_path: "/usr/bin/nvidia-smi"
+
+# ── Governance Zone — FPGA + BMC ───────────────────────────
+emma:
+  fpga:
+    model: "AMD Xilinx Versal AI Edge"
+    pcie_bus: "0000:61:00.0"
+    char_device: "/dev/emma_fpga0"       # custom PCIe char driver
+    firmware_path: "/opt/lucy/fpga/emma_v2.bit"
+    interrupt_mode: "NMI"                # or "PERST_RESET"
+    latency_target_us: 100              # microseconds
+    rust_daemon_socket: "/run/emma/governance.sock"
+    rust_daemon_bin: "/opt/lucy/bin/emma-daemon"
+  bmc:
+    model: "ASPEED AST2600"
+    interface: "ipmi"                   # or "redfish"
+    ipmi_host: "192.168.1.100"          # BMC out-of-band IP
+    ipmi_user: "lucy"
+    ipmi_pass_env: "LUCY_IPMI_PASS"     # read from env, never hardcode
+    redfish_base: "https://192.168.1.100/redfish/v1"
+    openbmc_host: "192.168.1.100"
+  iommu_groups:
+    gpu0: "group0"
+    gpu1: "group1"
+    gpu2: "group2"
+    gpu3: "group3"
+  pcie_acs_policy: "isolate"           # isolate | downstream | multifunction
+
+# ── SenseMesh — I3C/I2C Sensor Network ─────────────────────
+sensemesh:
+  i2c_buses:
+    - bus: 0
+      name: "GPU_THERMAL"
+      devices:
+        - addr: "0x48"
+          model: "TMP112"
+          label: "GPU0_inlet"
+        - addr: "0x49"
+          model: "TMP112"
+          label: "GPU1_inlet"
+        - addr: "0x4A"
+          model: "TMP112"
+          label: "GPU2_inlet"
+        - addr: "0x4B"
+          model: "TMP112"
+          label: "GPU3_inlet"
+    - bus: 1
+      name: "VRM_POWER"
+      devices:
+        - addr: "0x40"
+          model: "INA3221"
+          label: "GPU_ZONE_A_power"
+          channels: [0, 1, 2]
+        - addr: "0x41"
+          model: "INA3221"
+          label: "GPU_ZONE_B_power"
+          channels: [0, 1, 2]
+        - addr: "0x42"
+          model: "INA3221"
+          label: "HOST_power"
+          channels: [0, 1]
+    - bus: 2
+      name: "FPGA_SIDEBAND"
+      devices:
+        - addr: "0x50"
+          model: "FPGA_SIDEBAND"
+          label: "Emma telemetry sideband"
+  polling_interval_ms: 100
+  alert_thresholds:
+    temp_critical_c: 85
+    temp_warning_c: 75
+    power_critical_w: 2400
+    power_warning_w: 2200
+    voltage_drop_mv: 50
+
+# ── QMP Drift Controller — PTP + DVFS ──────────────────────
+qmp_drift:
+  ptp:
+    hardware_clock: "/dev/ptp0"
+    ptp4l_config: "/etc/ptp4l.conf"
+    ptp4l_interface: "enp1s0"           # NIC bonded to PTP source
+    ocxo_model: "SiTime SiT5356"
+    stratum: 3
+    sync_interval_ms: 10
+    offset_threshold_ns: 100
+  dvfs:
+    enabled: true
+    cpu_governor: "performance"         # performance | powersave | schedutil
+    gpu_lock_clocks: true
+    gpu_min_mhz: 1000
+    gpu_max_mhz: 2520                   # L40S boost clock
+    cgroup_cpu_weight: "/sys/fs/cgroup/lucy/cpu.weight"
+    cgroup_cpu_max: "/sys/fs/cgroup/lucy/cpu.max"
+    correction_interval_ms: 50
+
+# ── Memory Spine — NVMe RAID Storage ───────────────────────
+memory_spine:
+  nvme_devices:
+    - id: 0
+      model: "Kioxia CM7"
+      pcie_gen: 5
+      path: "/dev/nvme0n1"
+      capacity_tb: 4
+    - id: 1
+      model: "Kioxia CM7"
+      pcie_gen: 5
+      path: "/dev/nvme1n1"
+      capacity_tb: 4
+    - id: 2
+      model: "Kioxia CM7"
+      pcie_gen: 5
+      path: "/dev/nvme2n1"
+      capacity_tb: 4
+    - id: 3
+      model: "Kioxia CM7"
+      pcie_gen: 5
+      path: "/dev/nvme3n1"
+      capacity_tb: 4
+  raid:
+    level: 10
+    device: "/dev/md0"
+    mount_point: "/lucy/data"
+  chroma_db_path: "/lucy/data/chroma_global"
+  sqlite_path: "/lucy/data/sqlite"
+  faiss_path: "/lucy/data/faiss_local"
+
+# ── Power Delivery Network ──────────────────────────────────
+power:
+  vrm_controller: "Infineon XDPE132G5C"
+  vrm_i2c_bus: 1
+  vrm_i2c_addr: "0x60"
+  target_input_voltage_v: 48
+  zones:
+    compute:              # GPUs + PCIe Switch
+      budget_w: 1500
+      thermal_zone: "zone1"
+    logic:                # CPU + RAM + FPGA
+      budget_w: 500
+      thermal_zone: "zone2"
+    storage_power:        # NVMe + VRMs
+      budget_w: 200
+      thermal_zone: "zone3"
+  total_budget_w: 2400
+  emergency_throttle_w: 2200
+
+# ── PCIe Interconnect Switch ────────────────────────────────
+pcie_switch:
+  model: "Broadcom PEX89000"
+  pcie_bus: "0000:01:00.0"
+  topology: "switched_star"
+  port_latency_ns: 150
+  bandwidth_per_port_gbs: 128
+  cxl_enabled: true        # CXL 2.0 for host↔GPU memory coherency
+
+# ── Boot / Firmware ─────────────────────────────────────────
+firmware:
+  bios: "Coreboot + LinuxBoot"
+  kernel: "Linux 6.x hardened"
+  kernel_cmdline: "iommu=pt amd_iommu=on pci=pcie_bus_perf mitigations=off"
+  ebpf_scheduler: "/opt/lucy/ebpf/lucy_sched.bpf.o"
+  openbmc_image: "/opt/lucy/firmware/obmc-phosphor-image.img"
